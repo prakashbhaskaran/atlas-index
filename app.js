@@ -601,6 +601,7 @@
     document.getElementById("quizFeedback").textContent = " ";
     document.getElementById("quizFeedback").className = "quiz-feedback";
     document.getElementById("quizFoundTray").innerHTML = "";
+    renderLiveMap(quizPool);
 
     var input = document.getElementById("quizInput");
     input.placeholder = quizGame === "Countries" ? "Type a country name…" : "Type a capital…";
@@ -648,6 +649,7 @@
 
   function registerFind(c){
     document.getElementById("quizFound").textContent = quizFound.size;
+    markLiveMapFound(c.id);
     var fb = document.getElementById("quizFeedback");
     fb.textContent = "Approved — " + c.name + (quizGame === "Capitals" ? " · " + c.capital : "");
     var tray = document.getElementById("quizFoundTray");
@@ -718,8 +720,7 @@
     line.className = "map-hover mono" + (statusClass ? " " + statusClass : "");
   }
 
-  function renderRecallMap(pool, foundSet){
-    var svg = document.getElementById("recallMap");
+  function drawMapBase(svg, pool){
     while(svg.firstChild) svg.removeChild(svg.firstChild);
 
     for(var gx = 0; gx <= 360; gx += 30){
@@ -738,6 +739,37 @@
       t.textContent = region.toUpperCase();
       svg.appendChild(t);
     });
+  }
+
+  // Non-interactive live map: every country starts dimmed ("pending") and
+  // is flipped to green the instant it's typed correctly. Dot elements are
+  // kept in liveMapDotEls for O(1) updates instead of a full re-render.
+  var liveMapDotEls = {};
+
+  function renderLiveMap(pool){
+    var svg = document.getElementById("liveMap");
+    drawMapBase(svg, pool);
+    liveMapDotEls = {};
+    pool.forEach(function(c){
+      var dot = svgEl("circle", {
+        cx: c.lon + 180,
+        cy: 90 - c.lat,
+        r: 2.6,
+        "class": "map-dot pending"
+      });
+      svg.appendChild(dot);
+      liveMapDotEls[c.id] = dot;
+    });
+  }
+
+  function markLiveMapFound(id){
+    var dot = liveMapDotEls[id];
+    if(dot){ dot.setAttribute("class", "map-dot found"); }
+  }
+
+  function renderRecallMap(pool, foundSet){
+    var svg = document.getElementById("recallMap");
+    drawMapBase(svg, pool);
 
     pool.forEach(function(c){
       var found = foundSet.has(c.id);

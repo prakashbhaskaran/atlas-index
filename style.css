@@ -488,9 +488,9 @@ button{ font-family:inherit; }
   margin-top:.6rem;
   padding:.5rem;
 }
-#recallMap{ width:100%; height:auto; display:block; }
-#recallMap .grid-line{ stroke:var(--line); stroke-width:.4; }
-#recallMap .region-label{
+.world-map{ width:100%; height:auto; display:block; }
+.world-map .grid-line{ stroke:var(--line); stroke-width:.4; }
+.world-map .region-label{
   fill:var(--ink-soft);
   opacity:.55;
   font-family:"IBM Plex Mono", monospace;
@@ -498,20 +498,21 @@ button{ font-family:inherit; }
   letter-spacing:.05em;
   pointer-events:none;
 }
-#recallMap .map-hit{ fill:transparent; cursor:pointer; }
-#recallMap .map-dot{
+.world-map .map-hit{ fill:transparent; cursor:pointer; }
+.world-map .map-dot{
   stroke:var(--card-2);
   stroke-width:.6;
   pointer-events:none;
-  transition:r .12s ease;
+  transition:r .12s ease, fill .15s ease;
 }
 @media (prefers-reduced-motion: reduce){
-  #recallMap .map-dot{ transition:none; }
+  .world-map .map-dot{ transition:none; }
 }
-#recallMap .map-dot.found{ fill:var(--success); }
-#recallMap .map-dot.missed{ fill:var(--danger); }
-#recallMap .map-hit:hover + .map-dot,
-#recallMap .map-hit:focus + .map-dot{ r:4.4; }
+.world-map .map-dot.found{ fill:var(--success); }
+.world-map .map-dot.missed{ fill:var(--danger); }
+.world-map .map-dot.pending{ fill:var(--ink-soft); opacity:.4; }
+.world-map .map-hit:hover + .map-dot,
+.world-map .map-hit:focus + .map-dot{ r:4.4; }
 .map-hover{
   text-align:center;
   font-size:.78rem;
