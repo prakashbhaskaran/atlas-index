@@ -491,14 +491,14 @@
     var manifest = document.getElementById("resultsManifest");
     manifest.innerHTML = "";
     var missed = quizPool.filter(function(c){ return !quizFound.has(c.id); }).sort(byName);
+    document.getElementById("missedLabel").textContent = "Missed entries (" + missed.length + " of " + total + ")";
     if(!missed.length){
       manifest.innerHTML = '<p class="manifest-empty">Clean manifest — nothing missed.</p>';
     } else {
       missed.forEach(function(c){
         var row = document.createElement("div");
         row.className = "manifest-row";
-        var right = quizGame === "Countries" ? c.region : c.capital;
-        row.innerHTML = '<span class="q">' + c.flag + '&nbsp; ' + c.name + '</span><span class="a">' + right + '</span>';
+        row.innerHTML = '<span class="q">' + c.flag + '&nbsp; ' + c.name + '</span><span class="a">' + c.capital + ' · ' + c.region + '</span>';
         manifest.appendChild(row);
       });
     }
