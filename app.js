@@ -366,24 +366,32 @@
   var dirQuery = "";
   var dirLetter = "All";
 
-  var LETTER_COUNTS = {};
-  COUNTRIES.forEach(function(c){
-    var l = c.name.charAt(0).toUpperCase();
-    LETTER_COUNTS[l] = (LETTER_COUNTS[l] || 0) + 1;
-  });
   var ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 
+  function regionPool(region){
+    return region === "All" ? COUNTRIES : COUNTRIES.filter(function(c){ return c.region === region; });
+  }
+
+  // Rebuilt whenever the region filter changes, so each letter's count
+  // reflects only the countries in the currently selected region.
   function renderLetterIndex(){
+    var pool = regionPool(dirRegion);
+    var counts = {};
+    pool.forEach(function(c){
+      var l = c.name.charAt(0).toUpperCase();
+      counts[l] = (counts[l] || 0) + 1;
+    });
+
     var wrap = document.getElementById("dirLetterIndex");
     wrap.innerHTML = "";
     var allBtn = document.createElement("button");
     allBtn.className = "letter-btn"; allBtn.type = "button";
     allBtn.setAttribute("aria-pressed", dirLetter === "All" ? "true" : "false");
-    allBtn.innerHTML = "All<span class=\"n\">" + COUNTRIES.length + "</span>";
+    allBtn.innerHTML = "All<span class=\"n\">" + pool.length + "</span>";
     allBtn.addEventListener("click", function(){ dirLetter = "All"; renderDirectory(); });
     wrap.appendChild(allBtn);
     ALPHABET.forEach(function(letter){
-      var count = LETTER_COUNTS[letter] || 0;
+      var count = counts[letter] || 0;
       var btn = document.createElement("button");
       btn.className = "letter-btn"; btn.type = "button";
       btn.disabled = count === 0;
@@ -428,7 +436,10 @@
     dirQuery = e.target.value; renderDirectory();
   });
   makeChipset(document.getElementById("dirRegionChips"), ["All"].concat(REGIONS), "All", function(label){
-    dirRegion = label; renderDirectory();
+    dirRegion = label;
+    dirLetter = "All";
+    renderLetterIndex();
+    renderDirectory();
   });
   document.getElementById("dirGrid").addEventListener("click", function(e){
     var btn = e.target.closest(".star-btn");
