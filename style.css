@@ -321,8 +321,8 @@ button{ font-family:inherit; }
 }
 .entry .flag{ font-size:1.9rem; flex:none; }
 .entry-text{ min-width:0; flex:1; }
-.entry-text .name{ font-weight:600; font-size:.92rem; }
-.entry-text .cap{ font-size:.8rem; color:var(--ink-soft); margin-top:.1rem; }
+.entry-text .name{ display:block; font-weight:600; font-size:.92rem; line-height:1.3; }
+.entry-text .cap{ display:block; font-size:.8rem; color:var(--ink-soft); margin-top:.15rem; }
 .entry-side{ flex:none; display:flex; flex-direction:column; align-items:flex-end; gap:.35rem; }
 .star-btn{
   background:none; border:none; cursor:pointer;
@@ -380,6 +380,7 @@ button{ font-family:inherit; }
 .quiz-input:focus-visible{ border-color:var(--accent-2); }
 .custom-timer-row{
   display:flex;
+  flex-wrap:wrap;
   align-items:center;
   gap:.6rem;
   margin-top:-.4rem;
@@ -414,8 +415,10 @@ button{ font-family:inherit; }
 .quiz-feedback.correct{ color:var(--success); }
 .quiz-footer{
   display:flex;
+  flex-wrap:wrap;
   justify-content:space-between;
   align-items:center;
+  gap:.6rem;
   margin-top:1rem;
 }
 .found-tray{
@@ -495,10 +498,11 @@ button{ font-family:inherit; }
   letter-spacing:.05em;
   pointer-events:none;
 }
+#recallMap .map-hit{ fill:transparent; cursor:pointer; }
 #recallMap .map-dot{
   stroke:var(--card-2);
   stroke-width:.6;
-  cursor:pointer;
+  pointer-events:none;
   transition:r .12s ease;
 }
 @media (prefers-reduced-motion: reduce){
@@ -506,8 +510,8 @@ button{ font-family:inherit; }
 }
 #recallMap .map-dot.found{ fill:var(--success); }
 #recallMap .map-dot.missed{ fill:var(--danger); }
-#recallMap .map-dot:hover,
-#recallMap .map-dot:focus{ r:4.2; outline:none; }
+#recallMap .map-hit:hover + .map-dot,
+#recallMap .map-hit:focus + .map-dot{ r:4.4; }
 .map-hover{
   text-align:center;
   font-size:.78rem;

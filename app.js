@@ -741,25 +741,38 @@
 
     pool.forEach(function(c){
       var found = foundSet.has(c.id);
-      var dot = svgEl("circle", {
-        cx: c.lon + 180,
-        cy: 90 - c.lat,
-        r: 2.4,
-        "class": "map-dot " + (found ? "found" : "missed"),
+      var cx = c.lon + 180;
+      var cy = 90 - c.lat;
+      var g = svgEl("g", {});
+
+      // Oversized invisible circle so the tap/hover target stays usable
+      // even when the map is scaled down small on a phone screen.
+      var hit = svgEl("circle", {
+        cx: cx, cy: cy, r: 6,
+        "class": "map-hit",
         tabindex: "0",
         role: "button",
         "aria-label": c.name + " — " + c.capital + (found ? ", found" : ", missed")
       });
       var title = svgEl("title", {});
       title.textContent = c.name + " — " + c.capital;
-      dot.appendChild(title);
+      hit.appendChild(title);
+
+      var dot = svgEl("circle", {
+        cx: cx, cy: cy, r: 2.6,
+        "class": "map-dot " + (found ? "found" : "missed")
+      });
+
       var hoverText = c.flag + " " + c.name + " — " + c.capital + (found ? " (found)" : " (missed)");
       var statusClass = found ? "found" : "missed";
-      dot.addEventListener("mouseenter", function(){ setMapHover(hoverText, statusClass); });
-      dot.addEventListener("focus", function(){ setMapHover(hoverText, statusClass); });
-      dot.addEventListener("mouseleave", function(){ setMapHover("Hover or tap a point on the map", ""); });
-      dot.addEventListener("blur", function(){ setMapHover("Hover or tap a point on the map", ""); });
-      svg.appendChild(dot);
+      hit.addEventListener("mouseenter", function(){ setMapHover(hoverText, statusClass); });
+      hit.addEventListener("focus", function(){ setMapHover(hoverText, statusClass); });
+      hit.addEventListener("mouseleave", function(){ setMapHover("Hover or tap a point on the map", ""); });
+      hit.addEventListener("blur", function(){ setMapHover("Hover or tap a point on the map", ""); });
+
+      g.appendChild(hit);
+      g.appendChild(dot);
+      svg.appendChild(g);
     });
   }
 
