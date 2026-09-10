@@ -649,7 +649,7 @@
 
   function registerFind(c){
     document.getElementById("quizFound").textContent = quizFound.size;
-    markLiveMapFound(c.id);
+    markLiveMapFound(c);
     var fb = document.getElementById("quizFeedback");
     fb.textContent = "Approved — " + c.name + (quizGame === "Capitals" ? " · " + c.capital : "");
     var tray = document.getElementById("quizFoundTray");
@@ -757,14 +757,19 @@
   }
 
   // Non-interactive live map: every country starts dimmed ("pending") and
-  // is flipped to green the instant it's typed correctly. Dot elements are
-  // kept in liveMapDotEls for O(1) updates instead of a full re-render.
+  // is flipped to the success color the instant it's typed correctly. Dot
+  // elements are kept in liveMapDotEls for O(1) updates instead of a full
+  // re-render, and liveFindLabelEl is one reused <text> that jumps to
+  // whichever dot was just found and briefly names it.
   var liveMapDotEls = {};
+  var liveFindLabelEl = null;
+  var liveFindLabelTimer = null;
 
   function renderLiveMap(pool){
     var svg = document.getElementById("liveMap");
     drawMapBase(svg, pool);
     liveMapDotEls = {};
+    clearTimeout(liveFindLabelTimer);
     pool.forEach(function(c){
       var dot = svgEl("circle", {
         cx: c.lon + 180,
@@ -775,11 +780,31 @@
       svg.appendChild(dot);
       liveMapDotEls[c.id] = dot;
     });
+    liveFindLabelEl = svgEl("text", { "class": "find-label" });
+    svg.appendChild(liveFindLabelEl);
   }
 
-  function markLiveMapFound(id){
-    var dot = liveMapDotEls[id];
-    if(dot){ dot.setAttribute("class", "map-dot found"); }
+  function markLiveMapFound(c){
+    var dot = liveMapDotEls[c.id];
+    if(dot){
+      dot.setAttribute("class", "map-dot found pop");
+      dot.addEventListener("animationend", function handler(){
+        dot.setAttribute("class", "map-dot found");
+        dot.removeEventListener("animationend", handler);
+      });
+    }
+    if(liveFindLabelEl){
+      var x = Math.max(24, Math.min(336, c.lon + 180));
+      var y = Math.max(8, (90 - c.lat) - 6);
+      liveFindLabelEl.setAttribute("x", x);
+      liveFindLabelEl.setAttribute("y", y);
+      liveFindLabelEl.textContent = c.flag + " " + c.name;
+      liveFindLabelEl.classList.add("show");
+      clearTimeout(liveFindLabelTimer);
+      liveFindLabelTimer = setTimeout(function(){
+        liveFindLabelEl.classList.remove("show");
+      }, 1600);
+    }
   }
 
   function renderRecallMap(pool, foundSet){

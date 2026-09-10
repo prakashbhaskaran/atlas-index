@@ -529,6 +529,35 @@ button{ font-family:inherit; }
 .world-map .map-dot.pending{ fill:var(--ink-soft); opacity:.4; }
 .world-map .map-hit:hover + .map-dot,
 .world-map .map-hit:focus + .map-dot{ r:4.4; }
+
+@keyframes dotPop{
+  0%   { r:2.6; }
+  45%  { r:6.5; }
+  100% { r:2.6; }
+}
+.world-map .map-dot.pop{ animation:dotPop .5s ease-out; }
+@media (prefers-reduced-motion: reduce){
+  .world-map .map-dot.pop{ animation:none; }
+}
+
+.world-map .find-label{
+  font-family:"IBM Plex Mono", monospace;
+  font-size:7px;
+  font-weight:600;
+  fill:var(--success);
+  text-anchor:middle;
+  pointer-events:none;
+  paint-order:stroke;
+  stroke:var(--card-2);
+  stroke-width:1.6;
+  stroke-linejoin:round;
+  opacity:0;
+  transition:opacity .3s ease;
+}
+.world-map .find-label.show{ opacity:1; }
+@media (prefers-reduced-motion: reduce){
+  .world-map .find-label{ transition:none; }
+}
 .map-hover{
   text-align:center;
   font-size:.78rem;
