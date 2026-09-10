@@ -331,10 +331,6 @@
   var mastered = loadSet(STORE_KEY_MASTERED);
   var bestScores = loadObj(STORE_KEY_BEST);
 
-  function refreshMasteredStat(){
-    document.querySelector("#masteredStat b").textContent = mastered.size;
-  }
-
   /* ---------------- tabs ---------------- */
   var tabs = document.querySelectorAll(".tab");
   var panels = {
@@ -363,14 +359,6 @@
       });
       container.appendChild(btn);
     });
-  }
-
-  function shuffle(arr){
-    for(var i=arr.length-1;i>0;i--){
-      var j = Math.floor(Math.random()*(i+1));
-      var t = arr[i]; arr[i]=arr[j]; arr[j]=t;
-    }
-    return arr;
   }
 
   /* ================= DIRECTORY ================= */
@@ -448,7 +436,6 @@
     var id = btn.dataset.id;
     if(mastered.has(id)){ mastered.delete(id); } else { mastered.add(id); }
     saveSet(STORE_KEY_MASTERED, mastered);
-    refreshMasteredStat();
     renderDirectory();
   });
 
@@ -663,6 +650,15 @@
 
   document.getElementById("quizFinish").addEventListener("click", finishQuiz);
 
+  document.getElementById("quizCancel").addEventListener("click", function(){
+    if(!confirm("Cancel this checkpoint? Your progress on it won't be saved.")) return;
+    quizFinished = true;
+    clearInterval(quizTimerId);
+    document.getElementById("quizInput").disabled = true;
+    document.getElementById("quizRun").hidden = true;
+    document.getElementById("quizSetup").hidden = false;
+  });
+
   function finishQuiz(){
     if(quizFinished) return;
     quizFinished = true;
@@ -860,12 +856,11 @@
     if(!confirm("Clear all saved progress and best scores in this browser?")) return;
     mastered = new Set(); bestScores = {};
     saveSet(STORE_KEY_MASTERED, mastered); saveObj(STORE_KEY_BEST, bestScores);
-    refreshMasteredStat(); refreshBestLine(); renderDirectory();
+    refreshBestLine(); renderDirectory();
   });
 
   /* ================= boot ================= */
   function start(){
-    refreshMasteredStat();
     renderLetterIndex();
     renderDirectory();
   }

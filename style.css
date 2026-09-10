@@ -421,6 +421,7 @@ button{ font-family:inherit; }
   gap:.6rem;
   margin-top:1rem;
 }
+.quiz-footer-actions{ display:flex; flex-wrap:wrap; gap:.5rem; }
 .found-tray{
   display:flex;
   flex-wrap:wrap;
