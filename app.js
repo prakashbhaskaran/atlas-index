@@ -696,6 +696,21 @@
     document.getElementById("mapHoverLine").textContent = "Hover or tap a point on the map";
     document.getElementById("mapHoverLine").className = "map-hover mono";
     renderRecallMap(quizPool, quizFound);
+
+    var missed = quizPool.filter(function(c){ return !quizFound.has(c.id); }).sort(byName);
+    document.getElementById("missedListLabel").textContent = "Missed (" + missed.length + ")";
+    var missedTray = document.getElementById("missedTray");
+    missedTray.innerHTML = "";
+    if(!missed.length){
+      missedTray.innerHTML = '<p class="missed-empty">Clean sweep — nothing missed.</p>';
+    } else {
+      missed.forEach(function(c){
+        var chip = document.createElement("span");
+        chip.className = "missed-chip";
+        chip.innerHTML = '<span class="flag">' + c.flag + '</span><span>' + c.name + '</span>';
+        missedTray.appendChild(chip);
+      });
+    }
   }
 
   var REGION_LABEL_POS = {

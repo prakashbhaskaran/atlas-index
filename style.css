@@ -444,6 +444,22 @@ button{ font-family:inherit; }
 .found-chip .flag{ font-size:1.05rem; }
 .found-empty{ color:var(--ink-soft); font-size:.78rem; padding-top:1rem; margin-top:1rem; border-top:1px solid var(--line); }
 
+.missed-tray{ display:flex; flex-wrap:wrap; gap:.4rem; margin-top:.6rem; }
+.missed-chip{
+  display:inline-flex;
+  align-items:center;
+  gap:.4rem;
+  border:1px solid var(--danger);
+  background:var(--danger-bg);
+  color:var(--danger);
+  font-weight:600;
+  padding:.3rem .6rem;
+  border-radius:2px;
+  font-size:.8rem;
+}
+.missed-chip .flag{ font-size:1.05rem; }
+.missed-empty{ color:var(--success); font-size:.85rem; font-weight:600; margin-top:.6rem; }
+
 .results-score{
   text-align:center;
   margin-bottom:1.5rem;
