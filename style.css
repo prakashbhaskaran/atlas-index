@@ -11,8 +11,8 @@
   --card-2:#F3F0E6;
   --danger:#A8402F;
   --danger-bg:#F6E4DF;
-  --success:#2F6A45;
-  --success-bg:#E1EEE2;
+  --success:#2158A6;
+  --success-bg:#DBE7F6;
   --shadow:rgba(22,35,43,0.10);
   --focus:#2E6E6B;
 }
@@ -30,8 +30,8 @@
     --card-2:#1B2A30;
     --danger:#E67C6B;
     --danger-bg:#3A211D;
-    --success:#74C393;
-    --success-bg:#1D2E22;
+    --success:#5AA8F2;
+    --success-bg:#152838;
     --shadow:rgba(0,0,0,0.45);
     --focus:#7DD0C8;
   }
@@ -49,8 +49,8 @@
   --card-2:#1B2A30;
   --danger:#E67C6B;
   --danger-bg:#3A211D;
-  --success:#74C393;
-  --success-bg:#1D2E22;
+  --success:#5AA8F2;
+  --success-bg:#152838;
   --shadow:rgba(0,0,0,0.45);
   --focus:#7DD0C8;
 }
