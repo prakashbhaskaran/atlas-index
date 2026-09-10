@@ -7,22 +7,47 @@
   // constants all come from constants.js, loaded before this file.
   var REGIONS = Object.keys(RAW);
 
-  function codeToFlag(code){
-    return code.toUpperCase().replace(/./g, function(c){
-      return String.fromCodePoint(127397 + c.charCodeAt(0));
-    });
+  // Flag glyphs are rendered as real images rather than Unicode regional-
+  // indicator emoji: Windows browsers largely don't have flag glyphs in
+  // their emoji font and fall back to showing the raw two-letter code.
+  function flagImgUrl(code, width){
+    return "https://flagcdn.com/w" + width + "/" + code.toLowerCase() + ".png";
+  }
+  function flagImgHTML(c, width){
+    width = width || 80;
+    return '<img class="flag-img" src="' + flagImgUrl(c.code, width) + '" srcset="' +
+      flagImgUrl(c.code, width) + ' 1x, ' + flagImgUrl(c.code, width * 2) + ' 2x" alt="' + c.name +
+      '" loading="lazy" width="' + width + '" height="' + Math.round(width * 0.75) + '">';
   }
 
   var COUNTRIES = [];
   REGIONS.forEach(function(region){
     RAW[region].forEach(function(row){
       var coord = COUNTRY_COORDS[row[2]] || [0,0];
-      COUNTRIES.push({ name: row[0], capital: row[1], code: row[2], region: region, flag: codeToFlag(row[2]), lon: coord[0], lat: coord[1] });
+      COUNTRIES.push({ name: row[0], capital: row[1], code: row[2], region: region, lon: coord[0], lat: coord[1] });
     });
   });
   COUNTRIES.forEach(function(c, i){ c.id = c.code + "-" + i; });
 
   function byName(a,b){ return a.name.localeCompare(b.name); }
+
+  function shuffle(arr){
+    var a = arr.slice();
+    for(var i = a.length - 1; i > 0; i--){
+      var j = Math.floor(Math.random() * (i + 1));
+      var tmp = a[i]; a[i] = a[j]; a[j] = tmp;
+    }
+    return a;
+  }
+
+  function debounce(fn, wait){
+    var t;
+    return function(){
+      var ctx = this, args = arguments;
+      clearTimeout(t);
+      t = setTimeout(function(){ fn.apply(ctx, args); }, wait);
+    };
+  }
 
   /* ---------------- storage ---------------- */
   function loadSet(key){
@@ -116,14 +141,79 @@
     });
   }
 
+  var MOBILE_QUERY = "(max-width: 640px)";
+  function isMobileLayout(){ return window.matchMedia(MOBILE_QUERY).matches; }
+
+  function entryHTML(c){
+    return '<span class="flag">' + flagImgHTML(c) + '</span>' +
+      '<span class="entry-text"><span class="name">' + c.name + '</span><span class="cap">' + c.capital + '</span></span>' +
+      '<span class="entry-side"><span class="stamp">' + c.code + '</span>' +
+      '<button class="star-btn" type="button" aria-pressed="' + (mastered.has(c.id) ? "true":"false") + '" aria-label="Mark ' + c.name + ' as known" data-id="' + c.id + '">' + (mastered.has(c.id) ? "★" : "☆") + '</button></span>';
+  }
+
+  function makeEntryEl(c){
+    var el = document.createElement("div");
+    el.className = "entry";
+    el.dataset.id = c.id;
+    el.tabIndex = 0;
+    el.setAttribute("role", "button");
+    el.setAttribute("aria-label", "View details for " + c.name);
+    el.innerHTML = entryHTML(c);
+    return el;
+  }
+
+  function renderFlatGrid(grid, list){
+    var frag = document.createDocumentFragment();
+    list.forEach(function(c){
+      frag.appendChild(makeEntryEl(c));
+    });
+    grid.appendChild(frag);
+  }
+
+  // Mobile-only A→Z accordion, built with native <details> so expand/collapse
+  // needs no extra state to track — the DOM element's own open attribute is it.
+  function renderAccordion(grid, list){
+    var groups = {};
+    var order = [];
+    list.forEach(function(c){
+      var l = c.name.charAt(0).toUpperCase();
+      if(!groups[l]){ groups[l] = []; order.push(l); }
+      groups[l].push(c);
+    });
+    order.sort();
+    var openAll = dirQuery.trim().length > 0;
+    var frag = document.createDocumentFragment();
+    order.forEach(function(letter){
+      var items = groups[letter];
+      var details = document.createElement("details");
+      details.className = "letter-group";
+      if(openAll) details.open = true;
+      var summary = document.createElement("summary");
+      summary.className = "letter-group-summary";
+      summary.innerHTML = '<span class="letter-group-letter">' + letter + '</span><span class="n">' + items.length + '</span>';
+      details.appendChild(summary);
+      var listEl = document.createElement("div");
+      listEl.className = "letter-group-list";
+      items.forEach(function(c){
+        listEl.appendChild(makeEntryEl(c));
+      });
+      details.appendChild(listEl);
+      frag.appendChild(details);
+    });
+    grid.appendChild(frag);
+  }
+
   function renderDirectory(){
     document.querySelectorAll("#dirLetterIndex .letter-btn").forEach(function(b, i){
       var label = i === 0 ? "All" : ALPHABET[i-1];
       b.setAttribute("aria-pressed", dirLetter === label ? "true" : "false");
     });
+    var mobile = isMobileLayout();
     var list = COUNTRIES.filter(function(c){
       var regionOk = dirRegion === "All" || c.region === dirRegion;
-      var letterOk = dirLetter === "All" || c.name.charAt(0).toUpperCase() === dirLetter;
+      // On mobile the letter-index bar is hidden in favor of the accordion,
+      // so the single-letter filter doesn't apply there.
+      var letterOk = mobile || dirLetter === "All" || c.name.charAt(0).toUpperCase() === dirLetter;
       var q = dirQuery.trim().toLowerCase();
       var queryOk = !q || c.name.toLowerCase().indexOf(q) !== -1 || c.capital.toLowerCase().indexOf(q) !== -1 || c.code.toLowerCase().indexOf(q) !== -1;
       return regionOk && letterOk && queryOk;
@@ -132,19 +222,30 @@
     document.getElementById("dirCount").textContent = list.length + " of " + COUNTRIES.length + " entries";
     var grid = document.getElementById("dirGrid");
     grid.innerHTML = "";
-    var frag = document.createDocumentFragment();
-    list.forEach(function(c){
-      var el = document.createElement("div");
-      el.className = "entry";
-      el.innerHTML =
-        '<span class="flag">' + c.flag + '</span>' +
-        '<span class="entry-text"><span class="name">' + c.name + '</span><span class="cap">' + c.capital + '</span></span>' +
-        '<span class="entry-side"><span class="stamp">' + c.code + '</span>' +
-        '<button class="star-btn" type="button" aria-pressed="' + (mastered.has(c.id) ? "true":"false") + '" aria-label="Mark ' + c.name + ' as known" data-id="' + c.id + '">' + (mastered.has(c.id) ? "★" : "☆") + '</button></span>';
-      frag.appendChild(el);
-    });
-    grid.appendChild(frag);
+
+    if(!list.length){
+      grid.className = "grid";
+      grid.innerHTML = '<p class="dir-empty">No entries match.</p>';
+      return;
+    }
+
+    if(mobile){
+      grid.className = "grid accordion";
+      renderAccordion(grid, list);
+    } else {
+      grid.className = "grid";
+      renderFlatGrid(grid, list);
+    }
   }
+
+  var dirLayoutIsMobile = isMobileLayout();
+  window.addEventListener("resize", debounce(function(){
+    var nowMobile = isMobileLayout();
+    if(nowMobile !== dirLayoutIsMobile){
+      dirLayoutIsMobile = nowMobile;
+      renderDirectory();
+    }
+  }, 150));
 
   document.getElementById("dirSearch").addEventListener("input", function(e){
     dirQuery = e.target.value; renderDirectory();
@@ -156,12 +257,54 @@
     renderDirectory();
   });
   document.getElementById("dirGrid").addEventListener("click", function(e){
-    var btn = e.target.closest(".star-btn");
-    if(!btn) return;
-    var id = btn.dataset.id;
-    if(mastered.has(id)){ mastered.delete(id); } else { mastered.add(id); }
-    saveSet(STORE_KEY_MASTERED, mastered);
-    renderDirectory();
+    var star = e.target.closest(".star-btn");
+    if(star){
+      var id = star.dataset.id;
+      if(mastered.has(id)){ mastered.delete(id); } else { mastered.add(id); }
+      saveSet(STORE_KEY_MASTERED, mastered);
+      renderDirectory();
+      return;
+    }
+    var entryEl = e.target.closest(".entry");
+    if(entryEl && entryEl.dataset.id){ openEntryModal(entryEl.dataset.id); }
+  });
+  document.getElementById("dirGrid").addEventListener("keydown", function(e){
+    if(e.key !== "Enter" && e.key !== " ") return;
+    if(e.target.classList && e.target.classList.contains("entry")){
+      e.preventDefault();
+      openEntryModal(e.target.dataset.id);
+    }
+  });
+
+  /* ---------------- entry details modal ---------------- */
+  var modalLastFocus = null;
+  function openEntryModal(id){
+    var c = COUNTRIES.filter(function(x){ return x.id === id; })[0];
+    if(!c) return;
+    document.getElementById("entryModalFlag").innerHTML = flagImgHTML(c, 160);
+    document.getElementById("entryModalName").textContent = c.name;
+    document.getElementById("entryModalRegion").textContent = c.region;
+    document.getElementById("entryModalCapital").textContent = c.capital;
+    var langs = LANGUAGES[c.code] || [];
+    document.getElementById("entryModalLanguages").textContent = langs.length ? langs.join(", ") : "—";
+    document.getElementById("entryModalCurrency").textContent = CURRENCIES[c.code] || "—";
+    document.getElementById("entryModalCode").textContent = c.code;
+    modalLastFocus = document.activeElement;
+    document.getElementById("entryModalOverlay").hidden = false;
+    document.body.classList.add("modal-open");
+    document.getElementById("entryModalClose").focus();
+  }
+  function closeEntryModal(){
+    document.getElementById("entryModalOverlay").hidden = true;
+    document.body.classList.remove("modal-open");
+    if(modalLastFocus && typeof modalLastFocus.focus === "function") modalLastFocus.focus();
+  }
+  document.getElementById("entryModalClose").addEventListener("click", closeEntryModal);
+  document.getElementById("entryModalOverlay").addEventListener("click", function(e){
+    if(e.target === this) closeEntryModal();
+  });
+  document.addEventListener("keydown", function(e){
+    if(e.key === "Escape" && !document.getElementById("entryModalOverlay").hidden) closeEntryModal();
   });
 
   /* ================= QUIZ (recall checkpoint) ================= */
@@ -195,9 +338,24 @@
   var quizRegion = "All";
   var quizTimerLabel = "5 min";
 
-  makeChipset(document.getElementById("quizGameChips"), ["Countries","Capitals"], quizGame, function(v){
+  function updateModeUi(){
+    var input = document.getElementById("quizInput");
+    var hint = document.getElementById("quizHint");
+    if(quizGame === "Flags"){
+      input.placeholder = "Type the country for this flag…";
+      hint.textContent = "One flag at a time — type the matching country, or skip it.";
+    } else if(quizGame === "Capitals"){
+      input.placeholder = "Type a capital…";
+      hint.textContent = "Matches register as you type — no need to press Enter.";
+    } else {
+      input.placeholder = "Type a country name…";
+      hint.textContent = "Matches register as you type — no need to press Enter.";
+    }
+  }
+
+  makeChipset(document.getElementById("quizGameChips"), ["Countries","Capitals","Flags"], quizGame, function(v){
     quizGame = v;
-    document.getElementById("quizInput").placeholder = quizGame === "Countries" ? "Type a country name…" : "Type a capital…";
+    updateModeUi();
     refreshBestLine();
   });
   makeChipset(document.getElementById("quizRegionChips"), ["All"].concat(REGIONS), quizRegion, function(v){ quizRegion = v; refreshBestLine(); });
@@ -247,15 +405,20 @@
   var quizDurationMs = 0;
   var quizMode = "countdown";
   var quizFinished = false;
+  var quizFlagQueue = [];
+  var quizCurrentFlagId = null;
 
   function startQuiz(){
     quizPool = poolForRegion(quizRegion);
     if(quizPool.length < 2){ quizPool = COUNTRIES.slice(); }
-    var field = quizGame === "Countries" ? "name" : "capital";
-    var aliasMap = quizGame === "Countries" ? COUNTRY_ALIASES : CAPITAL_ALIASES;
+    // Flags mode still tests country names, so it shares the name lookup/aliases.
+    var field = quizGame === "Capitals" ? "capital" : "name";
+    var aliasMap = quizGame === "Capitals" ? CAPITAL_ALIASES : COUNTRY_ALIASES;
     quizLookup = buildLookup(quizPool, field, aliasMap);
     quizFound = new Set();
     quizFinished = false;
+    quizCurrentFlagId = null;
+    quizFlagQueue = quizGame === "Flags" ? shuffle(quizPool.map(function(c){ return c.id; })) : [];
 
     var durSec = getDurationSeconds();
     quizDurationMs = durSec ? durSec * 1000 : null;
@@ -272,15 +435,37 @@
     document.getElementById("quizFoundTray").innerHTML = "";
     renderLiveMap(quizPool);
 
+    document.getElementById("quizFlagPrompt").hidden = quizGame !== "Flags";
+    updateModeUi();
     var input = document.getElementById("quizInput");
-    input.placeholder = quizGame === "Countries" ? "Type a country name…" : "Type a capital…";
     input.disabled = false;
     input.value = "";
     input.focus();
+    if(quizGame === "Flags"){ showNextFlag(); }
 
     clearInterval(quizTimerId);
     tickTimer();
     quizTimerId = setInterval(tickTimer, 250);
+  }
+
+  function showNextFlag(){
+    if(!quizFlagQueue.length){ finishQuiz(); return; }
+    quizCurrentFlagId = quizFlagQueue[0];
+    var c = quizPool.filter(function(x){ return x.id === quizCurrentFlagId; })[0];
+    document.getElementById("quizFlagBig").innerHTML = flagImgHTML(c, 320);
+    var input = document.getElementById("quizInput");
+    input.value = "";
+    if(!quizFinished) input.focus();
+  }
+
+  function flashFlagIncorrect(){
+    var fb = document.getElementById("quizFeedback");
+    fb.textContent = "Not this flag — try again";
+    fb.className = "quiz-feedback wrong";
+    var prompt = document.getElementById("quizFlagPrompt");
+    prompt.classList.remove("shake");
+    void prompt.offsetWidth;
+    prompt.classList.add("shake");
   }
 
   function tickTimer(){
@@ -308,12 +493,30 @@
     var norm = normalizeStr(raw);
     if(!norm) return;
     var id = quizLookup[norm] || quizLookup[tightStr(raw)];
-    if(id && !quizFound.has(id)){
+    if(!id) return;
+
+    if(quizGame === "Flags"){
+      if(id !== quizCurrentFlagId){ flashFlagIncorrect(); return; }
+      quizFound.add(id);
+      var cFlag = quizPool.filter(function(x){ return x.id === id; })[0];
+      registerFind(cFlag);
+      quizFlagQueue.shift();
+      if(!quizFinished) showNextFlag();
+      return;
+    }
+
+    if(!quizFound.has(id)){
       quizFound.add(id);
       e.target.value = "";
-      var c = quizPool.filter(function(x){ return x.id === id; })[0];
-      registerFind(c);
+      var cFound = quizPool.filter(function(x){ return x.id === id; })[0];
+      registerFind(cFound);
     }
+  });
+
+  document.getElementById("quizFlagSkip").addEventListener("click", function(){
+    if(quizFinished || quizGame !== "Flags" || !quizFlagQueue.length) return;
+    quizFlagQueue.push(quizFlagQueue.shift());
+    showNextFlag();
   });
 
   function registerFind(c){
@@ -321,11 +524,12 @@
     markLiveMapFound(c);
     var fb = document.getElementById("quizFeedback");
     fb.textContent = "Approved — " + c.name + (quizGame === "Capitals" ? " · " + c.capital : "");
+    fb.className = "quiz-feedback correct";
     var tray = document.getElementById("quizFoundTray");
     var chip = document.createElement("span");
     chip.className = "found-chip";
-    var label = quizGame === "Countries" ? c.name : c.capital;
-    chip.innerHTML = '<span class="flag">' + c.flag + '</span><span>' + label + '</span>';
+    var label = quizGame === "Capitals" ? c.capital : c.name;
+    chip.innerHTML = '<span class="flag">' + flagImgHTML(c) + '</span><span>' + label + '</span>';
     tray.insertBefore(chip, tray.firstChild);
     if(quizFound.size >= quizPool.length){ finishQuiz(); }
   }
@@ -385,7 +589,7 @@
       missed.forEach(function(c){
         var chip = document.createElement("span");
         chip.className = "missed-chip";
-        chip.innerHTML = '<span class="flag">' + c.flag + '</span><span>' + c.name + '</span>';
+        chip.innerHTML = '<span class="flag">' + flagImgHTML(c) + '</span><span>' + c.name + '</span>';
         missedTray.appendChild(chip);
       });
     }
@@ -466,7 +670,7 @@
       var y = Math.max(8, (90 - c.lat) - 6);
       liveFindLabelEl.setAttribute("x", x);
       liveFindLabelEl.setAttribute("y", y);
-      liveFindLabelEl.textContent = c.flag + " " + c.name;
+      liveFindLabelEl.textContent = c.name;
       liveFindLabelEl.classList.add("show");
       clearTimeout(liveFindLabelTimer);
       liveFindLabelTimer = setTimeout(function(){
@@ -503,7 +707,7 @@
         "class": "map-dot " + (found ? "found" : "missed")
       });
 
-      var hoverText = c.flag + " " + c.name + " — " + c.capital + (found ? " (found)" : " (missed)");
+      var hoverText = c.name + " — " + c.capital + (found ? " (found)" : " (missed)");
       var statusClass = found ? "found" : "missed";
       hit.addEventListener("mouseenter", function(){ setMapHover(hoverText, statusClass); });
       hit.addEventListener("focus", function(){ setMapHover(hoverText, statusClass); });

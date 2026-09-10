@@ -75,12 +75,16 @@
         <span class="timer num" id="quizTimer">10:00</span>
         <span>Found <span class="score num" id="quizFound">0</span> / <span class="num" id="quizTotal">197</span></span>
       </div>
+      <div class="flag-prompt" id="quizFlagPrompt" hidden>
+        <span class="flag-big" id="quizFlagBig">🏳️</span>
+        <button class="ghost-btn" id="quizFlagSkip" type="button">Skip flag</button>
+      </div>
       <div class="quiz-input-row">
         <input class="quiz-input" id="quizInput" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Type a country name…" aria-label="Type an answer">
       </div>
       <p class="quiz-feedback correct" id="quizFeedback" aria-live="polite">&nbsp;</p>
       <div class="quiz-footer">
-        <span class="best-line">Matches register as you type — no need to press Enter.</span>
+        <span class="best-line" id="quizHint">Matches register as you type — no need to press Enter.</span>
         <div class="quiz-footer-actions">
           <button class="ghost-btn" id="quizCancel">Cancel</button>
           <button class="ghost-btn" id="quizFinish">Finish now</button>
@@ -122,6 +126,21 @@
   </section>
 
   <p class="footnote">Progress and scores are kept in this browser only. <button id="resetProgress">Clear saved progress</button></p>
+</div>
+
+<div class="modal-overlay" id="entryModalOverlay" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="entryModalName">
+    <button class="modal-close" id="entryModalClose" type="button" aria-label="Close details">×</button>
+    <div class="modal-flag" id="entryModalFlag"></div>
+    <h2 class="modal-name" id="entryModalName"></h2>
+    <p class="modal-region mono" id="entryModalRegion"></p>
+    <dl class="modal-facts">
+      <div><dt>Capital</dt><dd id="entryModalCapital"></dd></div>
+      <div><dt>Languages spoken</dt><dd id="entryModalLanguages"></dd></div>
+      <div><dt>Currency</dt><dd id="entryModalCurrency"></dd></div>
+      <div><dt>Code</dt><dd id="entryModalCode"></dd></div>
+    </dl>
+  </div>
 </div>
 
 <script src="constants.js"></script>
