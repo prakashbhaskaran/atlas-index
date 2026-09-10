@@ -456,18 +456,66 @@ button{ font-family:inherit; }
   color:var(--ink-soft);
   letter-spacing:.05em;
 }
-.manifest{ border-top:1px solid var(--line); }
-.manifest-row{
+.map-head{
   display:flex;
   justify-content:space-between;
-  gap:1rem;
-  padding:.55rem 0;
-  border-bottom:1px solid var(--line);
-  font-size:.85rem;
+  align-items:baseline;
+  flex-wrap:wrap;
+  gap:.5rem;
+  margin-top:1.3rem;
 }
-.manifest-row .q{ color:var(--ink-soft); }
-.manifest-row .a{ color:var(--danger); text-align:right; }
-.manifest-empty{ text-align:center; color:var(--ink-soft); font-size:.85rem; padding:1rem 0; }
+.map-head .field-label{ margin:0; }
+.map-legend{ display:flex; gap:1rem; }
+.legend-item{
+  display:inline-flex;
+  align-items:center;
+  gap:.35rem;
+  font-family:"IBM Plex Mono", monospace;
+  font-size:.68rem;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  color:var(--ink-soft);
+}
+.legend-dot{ width:.55rem; height:.55rem; border-radius:50%; display:inline-block; }
+.legend-dot.found{ background:var(--success); }
+.legend-dot.missed{ background:var(--danger); }
+.map-wrap{
+  border:1px solid var(--line);
+  background:var(--card-2);
+  margin-top:.6rem;
+  padding:.5rem;
+}
+#recallMap{ width:100%; height:auto; display:block; }
+#recallMap .grid-line{ stroke:var(--line); stroke-width:.4; }
+#recallMap .region-label{
+  fill:var(--ink-soft);
+  opacity:.55;
+  font-family:"IBM Plex Mono", monospace;
+  font-size:6px;
+  letter-spacing:.05em;
+  pointer-events:none;
+}
+#recallMap .map-dot{
+  stroke:var(--card-2);
+  stroke-width:.6;
+  cursor:pointer;
+  transition:r .12s ease;
+}
+@media (prefers-reduced-motion: reduce){
+  #recallMap .map-dot{ transition:none; }
+}
+#recallMap .map-dot.found{ fill:var(--success); }
+#recallMap .map-dot.missed{ fill:var(--danger); }
+#recallMap .map-dot:hover,
+#recallMap .map-dot:focus{ r:4.2; outline:none; }
+.map-hover{
+  text-align:center;
+  font-size:.78rem;
+  color:var(--ink-soft);
+  margin-top:.6rem;
+}
+.map-hover.found{ color:var(--success); font-weight:600; }
+.map-hover.missed{ color:var(--danger); font-weight:600; }
 .results-actions{ display:flex; justify-content:center; gap:.7rem; margin-top:1.4rem; flex-wrap:wrap; }
 
 .footnote{

@@ -95,8 +95,17 @@
         <div class="pct num" id="resultsPct">0% · 0:00</div>
       </div>
       <p class="best-line" id="resultsBestLine" style="text-align:center;"></p>
-      <p class="field-label" style="margin-top:1.3rem;" id="missedLabel">Missed entries</p>
-      <div class="manifest" id="resultsManifest"></div>
+      <div class="map-head">
+        <p class="field-label" id="missedLabel">Recall map</p>
+        <div class="map-legend">
+          <span class="legend-item"><span class="legend-dot found"></span>Found</span>
+          <span class="legend-item"><span class="legend-dot missed"></span>Missed</span>
+        </div>
+      </div>
+      <div class="map-wrap">
+        <svg id="recallMap" viewBox="0 0 360 180" role="img" aria-label="World recall map"></svg>
+      </div>
+      <p class="map-hover mono" id="mapHoverLine">Hover or tap a point on the map</p>
       <div class="results-actions">
         <button class="ghost-btn" id="resultsRetry">Retry same setup</button>
         <button class="solid-btn" id="resultsNewQuiz">Change settings</button>

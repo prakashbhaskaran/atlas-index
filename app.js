@@ -94,10 +94,211 @@
     });
   }
 
+  var COUNTRY_COORDS = {
+  "DZ":[3,28],
+  "AO":[18,-12],
+  "BJ":[2,9],
+  "BW":[24,-22],
+  "BF":[-2,12],
+  "BI":[30,-3],
+  "CV":[-24,16],
+  "CM":[12,6],
+  "CF":[21,6],
+  "TD":[19,15],
+  "KM":[43,-12],
+  "CD":[23,-3],
+  "CG":[15,-1],
+  "CI":[-5,8],
+  "DJ":[43,12],
+  "EG":[30,27],
+  "GQ":[10,2],
+  "ER":[39,15],
+  "SZ":[31,-26],
+  "ET":[39,9],
+  "GA":[11,-1],
+  "GM":[-15,13],
+  "GH":[-1,8],
+  "GN":[-10,10],
+  "GW":[-15,12],
+  "KE":[38,1],
+  "LS":[28,-29],
+  "LR":[-9,6],
+  "LY":[18,27],
+  "MG":[47,-19],
+  "MW":[34,-13],
+  "ML":[-4,17],
+  "MR":[-10,20],
+  "MU":[57,-20],
+  "MA":[-6,32],
+  "MZ":[35,-18],
+  "NA":[18,-22],
+  "NE":[8,16],
+  "NG":[8,9],
+  "RW":[30,-2],
+  "ST":[7,0],
+  "SN":[-14,14],
+  "SC":[55,-5],
+  "SL":[-12,8],
+  "SO":[46,5],
+  "ZA":[24,-29],
+  "SS":[30,7],
+  "SD":[30,15],
+  "TZ":[35,-6],
+  "TG":[1,8],
+  "TN":[9,34],
+  "UG":[32,1],
+  "ZM":[28,-14],
+  "ZW":[30,-19],
+  "AF":[66,34],
+  "AM":[45,40],
+  "AZ":[48,40],
+  "BH":[50,26],
+  "BD":[90,24],
+  "BT":[90,27],
+  "BN":[114,4.5],
+  "KH":[105,13],
+  "CN":[104,35],
+  "GE":[43,42],
+  "IN":[79,22],
+  "ID":[118,-2],
+  "IR":[53,32],
+  "IQ":[44,33],
+  "IL":[35,31],
+  "JP":[138,37],
+  "JO":[37,31],
+  "KZ":[67,48],
+  "KW":[48,29],
+  "KG":[75,41],
+  "LA":[103,18],
+  "LB":[36,34],
+  "MY":[109,3],
+  "MV":[73,3.5],
+  "MN":[104,46],
+  "MM":[96,21],
+  "NP":[84,28],
+  "KP":[127,40],
+  "OM":[56,21],
+  "PK":[69,30],
+  "PS":[35,31.9],
+  "PH":[122,12],
+  "QA":[51,25],
+  "SA":[45,24],
+  "SG":[104,1.3],
+  "KR":[128,36],
+  "LK":[81,8],
+  "SY":[38,35],
+  "TW":[121,24],
+  "TJ":[71,39],
+  "TH":[101,15],
+  "TL":[125.5,-8.8],
+  "TR":[35,39],
+  "TM":[60,40],
+  "AE":[54,24],
+  "UZ":[64,42],
+  "VN":[106,16],
+  "YE":[48,15],
+  "AL":[20,41],
+  "AD":[1.5,42.5],
+  "AT":[14,47.5],
+  "BY":[28,53.5],
+  "BE":[4.5,50.5],
+  "BA":[18,44],
+  "BG":[25,43],
+  "HR":[16,45],
+  "CY":[33,35],
+  "CZ":[15.5,49.8],
+  "DK":[10,56],
+  "EE":[26,59],
+  "FI":[26,64],
+  "FR":[2,47],
+  "DE":[10,51],
+  "GR":[22,39],
+  "VA":[12.45,41.9],
+  "HU":[19,47],
+  "IS":[-19,65],
+  "IE":[-8,53],
+  "IT":[12.5,42.5],
+  "XK":[21,42.6],
+  "LV":[25,57],
+  "LI":[9.5,47.15],
+  "LT":[24,55.3],
+  "LU":[6.1,49.7],
+  "MT":[14.4,35.9],
+  "MD":[28.5,47],
+  "MC":[7.4,43.7],
+  "ME":[19.3,42.7],
+  "NL":[5.5,52.3],
+  "MK":[21.7,41.6],
+  "NO":[10,62],
+  "PL":[19,52],
+  "PT":[-8,39.5],
+  "RO":[25,46],
+  "RU":[94,61],
+  "SM":[12.45,43.94],
+  "RS":[21,44],
+  "SK":[19.5,48.7],
+  "SI":[14.8,46.1],
+  "ES":[-4,40],
+  "SE":[16,62],
+  "CH":[8,47],
+  "UA":[32,49],
+  "GB":[-2,54],
+  "AG":[-61.8,17.1],
+  "BS":[-77,24],
+  "BB":[-59.5,13.2],
+  "BZ":[-88.5,17.2],
+  "CA":[-106,56],
+  "CR":[-84,10],
+  "CU":[-79,21.5],
+  "DM":[-61.4,15.4],
+  "DO":[-70.5,19],
+  "SV":[-88.9,13.8],
+  "GD":[-61.7,12.1],
+  "GT":[-90.2,15.5],
+  "HT":[-72.3,19],
+  "HN":[-86.5,15],
+  "JM":[-77.3,18.1],
+  "MX":[-102,23],
+  "NI":[-85.2,12.8],
+  "PA":[-80.1,8.5],
+  "KN":[-62.8,17.3],
+  "LC":[-60.98,13.9],
+  "VC":[-61.2,13.2],
+  "TT":[-61.3,10.7],
+  "US":[-98,39],
+  "AR":[-64,-34],
+  "BO":[-64.7,-17],
+  "BR":[-53,-10],
+  "CL":[-71,-30],
+  "CO":[-73,4],
+  "EC":[-78.5,-1.5],
+  "GY":[-58.9,5],
+  "PY":[-58.4,-23.4],
+  "PE":[-76,-10],
+  "SR":[-56,4],
+  "UY":[-56,-33],
+  "VE":[-66,8],
+  "AU":[134,-25],
+  "FJ":[178,-18],
+  "KI":[173,1.4],
+  "MH":[168,7],
+  "FM":[150,6.9],
+  "NR":[166.9,-0.5],
+  "NZ":[172,-41],
+  "PW":[134.6,7.5],
+  "PG":[144,-6],
+  "WS":[-172,-13.8],
+  "SB":[160,-9],
+  "TO":[-175.2,-21.2],
+  "TV":[179.2,-8],
+  "VU":[167,-16]
+  };
+
   var COUNTRIES = [];
   REGIONS.forEach(function(region){
     RAW[region].forEach(function(row){
-      COUNTRIES.push({ name: row[0], capital: row[1], code: row[2], region: region, flag: codeToFlag(row[2]) });
+      var coord = COUNTRY_COORDS[row[2]] || [0,0];
+      COUNTRIES.push({ name: row[0], capital: row[1], code: row[2], region: region, flag: codeToFlag(row[2]), lon: coord[0], lat: coord[1] });
     });
   });
   COUNTRIES.forEach(function(c, i){ c.id = c.code + "-" + i; });
@@ -488,20 +689,78 @@
     refreshBestLine();
     document.getElementById("resultsBestLine").textContent = bestLineText();
 
-    var manifest = document.getElementById("resultsManifest");
-    manifest.innerHTML = "";
-    var missed = quizPool.filter(function(c){ return !quizFound.has(c.id); }).sort(byName);
-    document.getElementById("missedLabel").textContent = "Missed entries (" + missed.length + " of " + total + ")";
-    if(!missed.length){
-      manifest.innerHTML = '<p class="manifest-empty">Clean manifest — nothing missed.</p>';
-    } else {
-      missed.forEach(function(c){
-        var row = document.createElement("div");
-        row.className = "manifest-row";
-        row.innerHTML = '<span class="q">' + c.flag + '&nbsp; ' + c.name + '</span><span class="a">' + c.capital + ' · ' + c.region + '</span>';
-        manifest.appendChild(row);
-      });
+    var missedCount = quizPool.length - found;
+    document.getElementById("missedLabel").textContent = "Recall map — " + missedCount + " missed of " + total;
+    document.getElementById("mapHoverLine").textContent = "Hover or tap a point on the map";
+    document.getElementById("mapHoverLine").className = "map-hover mono";
+    renderRecallMap(quizPool, quizFound);
+  }
+
+  var REGION_LABEL_POS = {
+    "Africa": [20,5],
+    "Asia": [90,35],
+    "Europe": [15,50],
+    "North America": [-95,42],
+    "South America": [-60,-18],
+    "Oceania": [140,-22]
+  };
+  var SVGNS = "http://www.w3.org/2000/svg";
+
+  function svgEl(tag, attrs){
+    var e = document.createElementNS(SVGNS, tag);
+    for(var k in attrs){ e.setAttribute(k, attrs[k]); }
+    return e;
+  }
+
+  function setMapHover(text, statusClass){
+    var line = document.getElementById("mapHoverLine");
+    line.textContent = text;
+    line.className = "map-hover mono" + (statusClass ? " " + statusClass : "");
+  }
+
+  function renderRecallMap(pool, foundSet){
+    var svg = document.getElementById("recallMap");
+    while(svg.firstChild) svg.removeChild(svg.firstChild);
+
+    for(var gx = 0; gx <= 360; gx += 30){
+      svg.appendChild(svgEl("line", { x1:gx, y1:0, x2:gx, y2:180, "class":"grid-line" }));
     }
+    for(var gy = 0; gy <= 180; gy += 30){
+      svg.appendChild(svgEl("line", { x1:0, y1:gy, x2:360, y2:gy, "class":"grid-line" }));
+    }
+
+    var regionsPresent = {};
+    pool.forEach(function(c){ regionsPresent[c.region] = true; });
+    Object.keys(REGION_LABEL_POS).forEach(function(region){
+      if(!regionsPresent[region]) return;
+      var pos = REGION_LABEL_POS[region];
+      var t = svgEl("text", { x: pos[0] + 180, y: 90 - pos[1], "class":"region-label", "text-anchor":"middle" });
+      t.textContent = region.toUpperCase();
+      svg.appendChild(t);
+    });
+
+    pool.forEach(function(c){
+      var found = foundSet.has(c.id);
+      var dot = svgEl("circle", {
+        cx: c.lon + 180,
+        cy: 90 - c.lat,
+        r: 2.4,
+        "class": "map-dot " + (found ? "found" : "missed"),
+        tabindex: "0",
+        role: "button",
+        "aria-label": c.name + " — " + c.capital + (found ? ", found" : ", missed")
+      });
+      var title = svgEl("title", {});
+      title.textContent = c.name + " — " + c.capital;
+      dot.appendChild(title);
+      var hoverText = c.flag + " " + c.name + " — " + c.capital + (found ? " (found)" : " (missed)");
+      var statusClass = found ? "found" : "missed";
+      dot.addEventListener("mouseenter", function(){ setMapHover(hoverText, statusClass); });
+      dot.addEventListener("focus", function(){ setMapHover(hoverText, statusClass); });
+      dot.addEventListener("mouseleave", function(){ setMapHover("Hover or tap a point on the map", ""); });
+      dot.addEventListener("blur", function(){ setMapHover("Hover or tap a point on the map", ""); });
+      svg.appendChild(dot);
+    });
   }
 
   document.getElementById("resultsNewQuiz").addEventListener("click", function(){
