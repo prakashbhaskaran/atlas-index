@@ -474,17 +474,32 @@
     if(!quizFinished) input.focus();
   }
 
+  function currentFlagIndex(){
+    for(var i = 0; i < quizPool.length; i++){
+      if(quizPool[i].id === quizCurrentFlagId) return i;
+    }
+    return -1;
+  }
+
   function autoSelectNextFlag(){
     var total = quizPool.length;
-    var startIdx = 0;
-    for(var i = 0; i < total; i++){
-      if(quizPool[i].id === quizCurrentFlagId){ startIdx = i; break; }
-    }
+    var startIdx = currentFlagIndex();
+    if(startIdx < 0) startIdx = -1;
     for(var offset = 1; offset <= total; offset++){
       var idx = (startIdx + offset) % total;
       if(!quizFound.has(quizPool[idx].id)){ selectFlagTile(quizPool[idx].id); return; }
     }
     resetFlagPrompt();
+  }
+
+  function stepFlag(direction){
+    var total = quizPool.length;
+    if(quizFinished || !total) return;
+    var startIdx = currentFlagIndex();
+    for(var offset = 1; offset <= total; offset++){
+      var idx = ((startIdx + direction * offset) % total + total) % total;
+      if(!quizFound.has(quizPool[idx].id)){ selectFlagTile(quizPool[idx].id); return; }
+    }
   }
 
   function selectFlagTile(id){
@@ -583,6 +598,9 @@
     tray.insertBefore(chip, tray.firstChild);
     if(quizFound.size >= quizPool.length){ finishQuiz(); }
   }
+
+  document.getElementById("quizFlagPrev").addEventListener("click", function(){ stepFlag(-1); });
+  document.getElementById("quizFlagNext").addEventListener("click", function(){ stepFlag(1); });
 
   document.getElementById("quizFinish").addEventListener("click", finishQuiz);
 

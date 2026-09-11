@@ -76,7 +76,11 @@
         <span>Found <span class="score num" id="quizFound">0</span> / <span class="num" id="quizTotal">197</span></span>
       </div>
       <div class="flag-prompt" id="quizFlagPrompt" hidden>
-        <span class="flag-big" id="quizFlagBig">🏳️</span>
+        <div class="flag-big-row">
+          <button class="flag-nav-btn" id="quizFlagPrev" type="button" aria-label="Previous flag">‹</button>
+          <span class="flag-big" id="quizFlagBig">🏳️</span>
+          <button class="flag-nav-btn" id="quizFlagNext" type="button" aria-label="Next flag">›</button>
+        </div>
         <p class="flag-picked-hint" id="quizFlagPickedHint">Pick a flag below to begin.</p>
       </div>
       <div class="quiz-input-row">

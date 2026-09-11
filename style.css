@@ -491,6 +491,33 @@ button{ font-family:inherit; }
   padding:2.2rem 1.4rem;
   margin-bottom:1rem;
 }
+.flag-big-row{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:1rem;
+  max-width:100%;
+}
+.flag-nav-btn{
+  flex:none;
+  width:2.4rem;
+  height:2.4rem;
+  border:1px solid var(--line);
+  background:var(--card);
+  color:var(--ink);
+  border-radius:50%;
+  font-size:1.3rem;
+  line-height:1;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.flag-nav-btn:hover:not(:disabled){ border-color:var(--accent-2); }
+.flag-nav-btn:disabled{ opacity:.3; cursor:default; }
+@media (max-width:480px){
+  .flag-nav-btn{ width:2rem; height:2rem; font-size:1.1rem; }
+}
 .flag-big{
   width:14rem;
   height:10.5rem;
