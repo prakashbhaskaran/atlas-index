@@ -77,12 +77,13 @@
       </div>
       <div class="flag-prompt" id="quizFlagPrompt" hidden>
         <span class="flag-big" id="quizFlagBig">🏳️</span>
-        <button class="ghost-btn" id="quizFlagSkip" type="button">Skip flag</button>
+        <p class="flag-picked-hint" id="quizFlagPickedHint">Pick a flag below to begin.</p>
       </div>
       <div class="quiz-input-row">
         <input class="quiz-input" id="quizInput" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Type a country name…" aria-label="Type an answer">
       </div>
       <p class="quiz-feedback correct" id="quizFeedback" aria-live="polite">&nbsp;</p>
+      <div class="flag-grid" id="quizFlagGrid" hidden aria-label="All flags — click one to answer it"></div>
       <div class="quiz-footer">
         <span class="best-line" id="quizHint">Matches register as you type — no need to press Enter.</span>
         <div class="quiz-footer-actions">

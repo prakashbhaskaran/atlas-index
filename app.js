@@ -343,7 +343,7 @@
     var hint = document.getElementById("quizHint");
     if(quizGame === "Flags"){
       input.placeholder = "Type the country for this flag…";
-      hint.textContent = "One flag at a time — type the matching country, or skip it.";
+      hint.textContent = "Click a flag below, then type the matching country.";
     } else if(quizGame === "Capitals"){
       input.placeholder = "Type a capital…";
       hint.textContent = "Matches register as you type — no need to press Enter.";
@@ -405,7 +405,6 @@
   var quizDurationMs = 0;
   var quizMode = "countdown";
   var quizFinished = false;
-  var quizFlagQueue = [];
   var quizCurrentFlagId = null;
 
   function startQuiz(){
@@ -418,7 +417,6 @@
     quizFound = new Set();
     quizFinished = false;
     quizCurrentFlagId = null;
-    quizFlagQueue = quizGame === "Flags" ? shuffle(quizPool.map(function(c){ return c.id; })) : [];
 
     var durSec = getDurationSeconds();
     quizDurationMs = durSec ? durSec * 1000 : null;
@@ -436,26 +434,56 @@
     renderLiveMap(quizPool);
 
     document.getElementById("quizFlagPrompt").hidden = quizGame !== "Flags";
+    document.getElementById("quizFlagGrid").hidden = quizGame !== "Flags";
     updateModeUi();
     var input = document.getElementById("quizInput");
     input.disabled = false;
     input.value = "";
     input.focus();
-    if(quizGame === "Flags"){ showNextFlag(); }
+    if(quizGame === "Flags"){ renderFlagGrid(); resetFlagPrompt(); }
 
     clearInterval(quizTimerId);
     tickTimer();
     quizTimerId = setInterval(tickTimer, 250);
   }
 
-  function showNextFlag(){
-    if(!quizFlagQueue.length){ finishQuiz(); return; }
-    quizCurrentFlagId = quizFlagQueue[0];
-    var c = quizPool.filter(function(x){ return x.id === quizCurrentFlagId; })[0];
-    document.getElementById("quizFlagBig").innerHTML = flagImgHTML(c, 320);
+  function renderFlagGrid(){
+    var grid = document.getElementById("quizFlagGrid");
+    grid.innerHTML = "";
+    quizPool.forEach(function(c){
+      var btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "flag-tile";
+      btn.dataset.id = c.id;
+      btn.setAttribute("aria-label", "Answer this flag");
+      btn.innerHTML = flagImgHTML(c, 80);
+      btn.addEventListener("click", function(){ selectFlagTile(c.id); });
+      grid.appendChild(btn);
+    });
+  }
+
+  function resetFlagPrompt(){
+    quizCurrentFlagId = null;
+    document.getElementById("quizFlagBig").textContent = "🏳️";
+    document.getElementById("quizFlagPickedHint").textContent = "Pick a flag below to begin.";
     var input = document.getElementById("quizInput");
     input.value = "";
     if(!quizFinished) input.focus();
+  }
+
+  function selectFlagTile(id){
+    if(quizFinished || quizFound.has(id)) return;
+    quizCurrentFlagId = id;
+    var c = quizPool.filter(function(x){ return x.id === id; })[0];
+    document.getElementById("quizFlagBig").innerHTML = flagImgHTML(c, 320);
+    document.getElementById("quizFlagPickedHint").textContent = "Type the country for this flag…";
+    var grid = document.getElementById("quizFlagGrid");
+    Array.prototype.forEach.call(grid.querySelectorAll(".flag-tile"), function(tile){
+      tile.classList.toggle("selected", tile.dataset.id === id);
+    });
+    var input = document.getElementById("quizInput");
+    input.value = "";
+    input.focus();
   }
 
   function flashFlagIncorrect(){
@@ -496,12 +524,14 @@
     if(!id) return;
 
     if(quizGame === "Flags"){
+      if(!quizCurrentFlagId) return;
       if(id !== quizCurrentFlagId){ flashFlagIncorrect(); return; }
       quizFound.add(id);
       var cFlag = quizPool.filter(function(x){ return x.id === id; })[0];
       registerFind(cFlag);
-      quizFlagQueue.shift();
-      if(!quizFinished) showNextFlag();
+      var tile = document.querySelector('.flag-tile[data-id="' + id + '"]');
+      if(tile){ tile.disabled = true; tile.classList.remove("selected"); }
+      if(!quizFinished) resetFlagPrompt();
       return;
     }
 
@@ -511,12 +541,6 @@
       var cFound = quizPool.filter(function(x){ return x.id === id; })[0];
       registerFind(cFound);
     }
-  });
-
-  document.getElementById("quizFlagSkip").addEventListener("click", function(){
-    if(quizFinished || quizGame !== "Flags" || !quizFlagQueue.length) return;
-    quizFlagQueue.push(quizFlagQueue.shift());
-    showNextFlag();
   });
 
   function registerFind(c){
