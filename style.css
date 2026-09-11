@@ -868,4 +868,22 @@ body.modal-open{ overflow:hidden; }
   color:var(--ink);
 }
 
+/* ---------- confirm modal ---------- */
+.confirm-modal{
+  max-width:340px;
+  padding:1.8rem 1.6rem;
+}
+.confirm-modal-message{
+  font-size:.95rem;
+  color:var(--ink);
+  line-height:1.5;
+  margin:0 0 1.5rem;
+}
+.confirm-modal-actions{
+  display:flex;
+  justify-content:center;
+  gap:.6rem;
+  flex-wrap:wrap;
+}
+
 [hidden]{ display:none !important; }

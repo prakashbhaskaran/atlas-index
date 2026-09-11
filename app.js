@@ -277,7 +277,6 @@
   });
 
   /* ---------------- entry details modal ---------------- */
-  var modalLastFocus = null;
   function openEntryModal(id){
     var c = COUNTRIES.filter(function(x){ return x.id === id; })[0];
     if(!c) return;
@@ -289,15 +288,12 @@
     document.getElementById("entryModalLanguages").textContent = langs.length ? langs.join(", ") : "—";
     document.getElementById("entryModalCurrency").textContent = CURRENCIES[c.code] || "—";
     document.getElementById("entryModalCode").textContent = c.code;
-    modalLastFocus = document.activeElement;
     document.getElementById("entryModalOverlay").hidden = false;
     document.body.classList.add("modal-open");
-    document.getElementById("entryModalClose").focus();
   }
   function closeEntryModal(){
     document.getElementById("entryModalOverlay").hidden = true;
     document.body.classList.remove("modal-open");
-    if(modalLastFocus && typeof modalLastFocus.focus === "function") modalLastFocus.focus();
   }
   document.getElementById("entryModalClose").addEventListener("click", closeEntryModal);
   document.getElementById("entryModalOverlay").addEventListener("click", function(e){
@@ -306,6 +302,35 @@
   document.addEventListener("keydown", function(e){
     if(e.key === "Escape" && !document.getElementById("entryModalOverlay").hidden) closeEntryModal();
   });
+
+  /* ---------------- confirm modal ---------------- */
+  function showConfirm(message, okLabel, onConfirm){
+    var overlay = document.getElementById("confirmModalOverlay");
+    var okBtn = document.getElementById("confirmModalOk");
+    var cancelBtn = document.getElementById("confirmModalCancel");
+    document.getElementById("confirmModalMessage").textContent = message;
+    okBtn.textContent = okLabel;
+    overlay.hidden = false;
+    document.body.classList.add("modal-open");
+
+    function cleanup(){
+      overlay.hidden = true;
+      document.body.classList.remove("modal-open");
+      okBtn.removeEventListener("click", handleOk);
+      cancelBtn.removeEventListener("click", handleCancel);
+      overlay.removeEventListener("click", handleOverlayClick);
+      document.removeEventListener("keydown", handleKeydown);
+    }
+    function handleOk(){ cleanup(); onConfirm(); }
+    function handleCancel(){ cleanup(); }
+    function handleOverlayClick(e){ if(e.target === overlay) cleanup(); }
+    function handleKeydown(e){ if(e.key === "Escape") cleanup(); }
+
+    okBtn.addEventListener("click", handleOk);
+    cancelBtn.addEventListener("click", handleCancel);
+    overlay.addEventListener("click", handleOverlayClick);
+    document.addEventListener("keydown", handleKeydown);
+  }
 
   /* ================= QUIZ (recall checkpoint) ================= */
   function normalizeStr(s){
@@ -440,8 +465,7 @@
     var input = document.getElementById("quizInput");
     input.disabled = false;
     input.value = "";
-    input.focus();
-    if(quizGame === "Flags"){ renderFlagGrid(); resetFlagPrompt(); }
+    if(quizGame === "Flags"){ renderFlagGrid(); selectFlagTile(quizPool[0].id); }
 
     clearInterval(quizTimerId);
     tickTimer();
@@ -469,9 +493,7 @@
     quizCurrentFlagId = null;
     document.getElementById("quizFlagBig").textContent = "🏳️";
     document.getElementById("quizFlagPickedHint").textContent = "Pick a flag below to begin.";
-    var input = document.getElementById("quizInput");
-    input.value = "";
-    if(!quizFinished) input.focus();
+    document.getElementById("quizInput").value = "";
   }
 
   function currentFlagIndex(){
@@ -516,9 +538,7 @@
       if(isSelected) selectedTile = tile;
     });
     if(selectedTile) selectedTile.scrollIntoView({ behavior: "smooth", block: "nearest" });
-    var input = document.getElementById("quizInput");
-    input.value = "";
-    input.focus();
+    document.getElementById("quizInput").value = "";
   }
 
   function flashFlagIncorrect(){
@@ -605,12 +625,13 @@
   document.getElementById("quizFinish").addEventListener("click", finishQuiz);
 
   document.getElementById("quizCancel").addEventListener("click", function(){
-    if(!confirm("Cancel this checkpoint? Your progress on it won't be saved.")) return;
-    quizFinished = true;
-    clearInterval(quizTimerId);
-    document.getElementById("quizInput").disabled = true;
-    document.getElementById("quizRun").hidden = true;
-    document.getElementById("quizSetup").hidden = false;
+    showConfirm("Cancel this checkpoint? Your progress on it won't be saved.", "Cancel checkpoint", function(){
+      quizFinished = true;
+      clearInterval(quizTimerId);
+      document.getElementById("quizInput").disabled = true;
+      document.getElementById("quizRun").hidden = true;
+      document.getElementById("quizSetup").hidden = false;
+    });
   });
 
   function finishQuiz(){
@@ -800,10 +821,11 @@
 
   /* ================= reset ================= */
   document.getElementById("resetProgress").addEventListener("click", function(){
-    if(!confirm("Clear all saved progress and best scores in this browser?")) return;
-    mastered = new Set(); bestScores = {};
-    saveSet(STORE_KEY_MASTERED, mastered); saveObj(STORE_KEY_BEST, bestScores);
-    refreshBestLine(); renderDirectory();
+    showConfirm("Clear all saved progress and best scores in this browser?", "Clear progress", function(){
+      mastered = new Set(); bestScores = {};
+      saveSet(STORE_KEY_MASTERED, mastered); saveObj(STORE_KEY_BEST, bestScores);
+      refreshBestLine(); renderDirectory();
+    });
   });
 
   /* ================= boot ================= */
