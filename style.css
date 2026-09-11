@@ -492,18 +492,19 @@ button{ font-family:inherit; }
   margin-bottom:1rem;
 }
 .flag-big{
-  font-size:10rem;
+  width:14rem;
+  height:10.5rem;
+  font-size:6rem;
   line-height:1;
-  display:inline-flex;
+  display:flex;
   align-items:center;
   justify-content:center;
   max-width:100%;
 }
 .flag-big .flag-img{
-  width:auto;
-  max-width:1.4em;
-  height:auto;
-  max-height:1.05em;
+  width:100%;
+  height:100%;
+  object-fit:contain;
   border-radius:8px;
   box-shadow:0 4px 14px var(--shadow), 0 0 0 1px var(--line) inset;
   animation:flagFadeIn .18s ease;
@@ -516,10 +517,10 @@ button{ font-family:inherit; }
   .flag-big .flag-img{ animation:none; }
 }
 @media (max-width:640px){
-  .flag-big{ font-size:7rem; }
+  .flag-big{ width:9.8rem; height:7.35rem; font-size:4.4rem; }
 }
 @media (max-width:480px){
-  .flag-big{ font-size:5.2rem; }
+  .flag-big{ width:7.28rem; height:5.46rem; font-size:3.4rem; }
 }
 .flag-picked-hint{
   font-family:"IBM Plex Mono", monospace;
