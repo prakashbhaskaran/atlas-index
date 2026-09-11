@@ -91,10 +91,12 @@
           <button class="ghost-btn" id="quizFinish">Finish now</button>
         </div>
       </div>
-      <div class="map-wrap">
-        <svg id="liveMap" class="world-map" viewBox="0 0 360 180" role="img" aria-label="Live recall map"></svg>
+      <div id="quizLiveMapSection">
+        <div class="map-wrap">
+          <svg id="liveMap" class="world-map" viewBox="0 0 360 180" role="img" aria-label="Live recall map"></svg>
+        </div>
+        <p class="map-hover mono">Points light up the moment you find them — the rest stay dimmed.</p>
       </div>
-      <p class="map-hover mono">Points light up the moment you find them — the rest stay dimmed.</p>
       <div class="found-tray" id="quizFoundTray"></div>
     </div>
 
@@ -105,17 +107,19 @@
         <div class="pct num" id="resultsPct">0% · 0:00</div>
       </div>
       <p class="best-line" id="resultsBestLine" style="text-align:center;"></p>
-      <div class="map-head">
-        <p class="field-label" id="missedLabel">Recall map</p>
-        <div class="map-legend">
-          <span class="legend-item"><span class="legend-dot found"></span>Found</span>
-          <span class="legend-item"><span class="legend-dot missed"></span>Missed</span>
+      <div id="resultsMapSection">
+        <div class="map-head">
+          <p class="field-label" id="missedLabel">Recall map</p>
+          <div class="map-legend">
+            <span class="legend-item"><span class="legend-dot found"></span>Found</span>
+            <span class="legend-item"><span class="legend-dot missed"></span>Missed</span>
+          </div>
         </div>
+        <div class="map-wrap">
+          <svg id="recallMap" class="world-map" viewBox="0 0 360 180" role="img" aria-label="World recall map"></svg>
+        </div>
+        <p class="map-hover mono" id="mapHoverLine">Hover or tap a point on the map</p>
       </div>
-      <div class="map-wrap">
-        <svg id="recallMap" class="world-map" viewBox="0 0 360 180" role="img" aria-label="World recall map"></svg>
-      </div>
-      <p class="map-hover mono" id="mapHoverLine">Hover or tap a point on the map</p>
       <p class="field-label" style="margin-top:1.3rem;" id="missedListLabel">Missed</p>
       <div class="missed-tray" id="missedTray"></div>
       <div class="results-actions">

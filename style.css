@@ -540,23 +540,37 @@ button{ font-family:inherit; }
   border:1px solid var(--line);
   background:var(--card-2);
   border-radius:4px;
-  padding:.3rem;
+  padding:.3rem .25rem;
   cursor:pointer;
   display:flex;
+  flex-direction:column;
   align-items:center;
   justify-content:center;
-  aspect-ratio:4/3;
+  gap:.25rem;
 }
 .flag-tile .flag-img{
   width:100%;
-  height:100%;
+  aspect-ratio:4/3;
+  height:auto;
   object-fit:contain;
   box-shadow:none;
   background:transparent;
 }
+.flag-tile .tile-name{
+  display:none;
+  font-size:.62rem;
+  font-weight:600;
+  text-align:center;
+  line-height:1.15;
+  color:var(--success);
+  word-break:break-word;
+}
 .flag-tile:hover:not(:disabled){ border-color:var(--accent-2); }
 .flag-tile.selected{ border-color:var(--ink); box-shadow:0 0 0 2px var(--ink) inset; }
-.flag-tile:disabled{ opacity:.3; cursor:default; }
+.flag-tile:disabled{ cursor:default; }
+.flag-tile.found{ border-color:var(--success); background:var(--card); }
+.flag-tile.found .flag-img{ opacity:.45; }
+.flag-tile.found .tile-name{ display:block; }
 .quiz-footer{
   display:flex;
   flex-wrap:wrap;
@@ -589,20 +603,29 @@ button{ font-family:inherit; }
 .found-chip .flag{ font-size:1.05rem; }
 .found-empty{ color:var(--ink-soft); font-size:.78rem; padding-top:1rem; margin-top:1rem; border-top:1px solid var(--line); }
 
-.missed-tray{ display:flex; flex-wrap:wrap; gap:.4rem; margin-top:.6rem; }
+.missed-tray{
+  display:grid;
+  grid-template-columns:repeat(auto-fill, minmax(72px, 1fr));
+  gap:.5rem;
+  margin-top:.6rem;
+}
 .missed-chip{
-  display:inline-flex;
+  display:flex;
+  flex-direction:column;
   align-items:center;
-  gap:.4rem;
+  justify-content:center;
+  gap:.3rem;
   border:1px solid var(--danger);
   background:var(--danger-bg);
   color:var(--danger);
   font-weight:600;
-  padding:.3rem .6rem;
-  border-radius:2px;
-  font-size:.8rem;
+  padding:.4rem .3rem;
+  border-radius:4px;
+  font-size:.66rem;
+  text-align:center;
 }
-.missed-chip .flag{ font-size:1.05rem; }
+.missed-chip .flag{ font-size:1.9rem; width:100%; display:flex; justify-content:center; }
+.missed-chip .flag-img{ box-shadow:none; background:transparent; width:100%; aspect-ratio:4/3; height:auto; object-fit:contain; }
 .missed-empty{ color:var(--success); font-size:.85rem; font-weight:600; margin-top:.6rem; }
 
 .results-score{

@@ -435,6 +435,7 @@
 
     document.getElementById("quizFlagPrompt").hidden = quizGame !== "Flags";
     document.getElementById("quizFlagGrid").hidden = quizGame !== "Flags";
+    document.getElementById("quizLiveMapSection").hidden = quizGame === "Flags";
     updateModeUi();
     var input = document.getElementById("quizInput");
     input.disabled = false;
@@ -456,7 +457,7 @@
       btn.className = "flag-tile";
       btn.dataset.id = c.id;
       btn.setAttribute("aria-label", "Answer this flag");
-      btn.innerHTML = flagImgHTML(c, 80);
+      btn.innerHTML = flagImgHTML(c, 80) + '<span class="tile-name"></span>';
       btn.addEventListener("click", function(){ selectFlagTile(c.id); });
       grid.appendChild(btn);
     });
@@ -469,6 +470,13 @@
     var input = document.getElementById("quizInput");
     input.value = "";
     if(!quizFinished) input.focus();
+  }
+
+  function autoSelectNextFlag(){
+    for(var i = 0; i < quizPool.length; i++){
+      if(!quizFound.has(quizPool[i].id)){ selectFlagTile(quizPool[i].id); return; }
+    }
+    resetFlagPrompt();
   }
 
   function selectFlagTile(id){
@@ -530,8 +538,14 @@
       var cFlag = quizPool.filter(function(x){ return x.id === id; })[0];
       registerFind(cFlag);
       var tile = document.querySelector('.flag-tile[data-id="' + id + '"]');
-      if(tile){ tile.disabled = true; tile.classList.remove("selected"); }
-      if(!quizFinished) resetFlagPrompt();
+      if(tile){
+        tile.disabled = true;
+        tile.classList.remove("selected");
+        tile.classList.add("found");
+        var nameEl = tile.querySelector(".tile-name");
+        if(nameEl) nameEl.textContent = cFlag.name;
+      }
+      if(!quizFinished) autoSelectNextFlag();
       return;
     }
 
@@ -598,10 +612,13 @@
     document.getElementById("resultsBestLine").textContent = bestLineText();
 
     var missedCount = quizPool.length - found;
-    document.getElementById("missedLabel").textContent = "Recall map — " + missedCount + " missed of " + total;
-    document.getElementById("mapHoverLine").textContent = "Hover or tap a point on the map";
-    document.getElementById("mapHoverLine").className = "map-hover mono";
-    renderRecallMap(quizPool, quizFound);
+    document.getElementById("resultsMapSection").hidden = quizGame === "Flags";
+    if(quizGame !== "Flags"){
+      document.getElementById("missedLabel").textContent = "Recall map — " + missedCount + " missed of " + total;
+      document.getElementById("mapHoverLine").textContent = "Hover or tap a point on the map";
+      document.getElementById("mapHoverLine").className = "map-hover mono";
+      renderRecallMap(quizPool, quizFound);
+    }
 
     var missed = quizPool.filter(function(c){ return !quizFound.has(c.id); }).sort(byName);
     document.getElementById("missedListLabel").textContent = "Missed (" + missed.length + ")";
