@@ -473,8 +473,14 @@
   }
 
   function autoSelectNextFlag(){
-    for(var i = 0; i < quizPool.length; i++){
-      if(!quizFound.has(quizPool[i].id)){ selectFlagTile(quizPool[i].id); return; }
+    var total = quizPool.length;
+    var startIdx = 0;
+    for(var i = 0; i < total; i++){
+      if(quizPool[i].id === quizCurrentFlagId){ startIdx = i; break; }
+    }
+    for(var offset = 1; offset <= total; offset++){
+      var idx = (startIdx + offset) % total;
+      if(!quizFound.has(quizPool[idx].id)){ selectFlagTile(quizPool[idx].id); return; }
     }
     resetFlagPrompt();
   }
