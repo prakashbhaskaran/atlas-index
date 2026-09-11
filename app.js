@@ -457,7 +457,9 @@
       btn.className = "flag-tile";
       btn.dataset.id = c.id;
       btn.setAttribute("aria-label", "Answer this flag");
-      btn.innerHTML = flagImgHTML(c, 80) + '<span class="tile-name"></span>';
+      // Same width as the enlarged prompt image below, so selecting a tile
+      // reuses the already-cached asset instead of firing a fresh request.
+      btn.innerHTML = flagImgHTML(c, 160) + '<span class="tile-name"></span>';
       btn.addEventListener("click", function(){ selectFlagTile(c.id); });
       grid.appendChild(btn);
     });
@@ -489,12 +491,16 @@
     if(quizFinished || quizFound.has(id)) return;
     quizCurrentFlagId = id;
     var c = quizPool.filter(function(x){ return x.id === id; })[0];
-    document.getElementById("quizFlagBig").innerHTML = flagImgHTML(c, 320);
+    document.getElementById("quizFlagBig").innerHTML = flagImgHTML(c, 160);
     document.getElementById("quizFlagPickedHint").textContent = "Type the country for this flag…";
     var grid = document.getElementById("quizFlagGrid");
+    var selectedTile = null;
     Array.prototype.forEach.call(grid.querySelectorAll(".flag-tile"), function(tile){
-      tile.classList.toggle("selected", tile.dataset.id === id);
+      var isSelected = tile.dataset.id === id;
+      tile.classList.toggle("selected", isSelected);
+      if(isSelected) selectedTile = tile;
     });
+    if(selectedTile) selectedTile.scrollIntoView({ behavior: "smooth", block: "nearest" });
     var input = document.getElementById("quizInput");
     input.value = "";
     input.focus();

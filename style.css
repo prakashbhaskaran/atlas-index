@@ -506,6 +506,14 @@ button{ font-family:inherit; }
   max-height:1.05em;
   border-radius:8px;
   box-shadow:0 4px 14px var(--shadow), 0 0 0 1px var(--line) inset;
+  animation:flagFadeIn .18s ease;
+}
+@keyframes flagFadeIn{
+  from{ opacity:0; transform:scale(.97); }
+  to{ opacity:1; transform:scale(1); }
+}
+@media (prefers-reduced-motion: reduce){
+  .flag-big .flag-img{ animation:none; }
 }
 @media (max-width:640px){
   .flag-big{ font-size:7rem; }
@@ -547,6 +555,7 @@ button{ font-family:inherit; }
   align-items:center;
   justify-content:center;
   gap:.25rem;
+  transition:border-color .15s ease, box-shadow .15s ease, background-color .15s ease;
 }
 .flag-tile .flag-img{
   width:100%;
@@ -555,6 +564,7 @@ button{ font-family:inherit; }
   object-fit:contain;
   box-shadow:none;
   background:transparent;
+  transition:opacity .15s ease;
 }
 .flag-tile .tile-name{
   display:none;
