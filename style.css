@@ -620,6 +620,14 @@ button{ font-family:inherit; }
   margin-top:1rem;
 }
 .quiz-footer-actions{ display:flex; flex-wrap:wrap; gap:.5rem; }
+#quizRun.paused .flag-prompt,
+#quizRun.paused .flag-grid,
+#quizRun.paused .quiz-input-row,
+#quizRun.paused #quizLiveMapSection{
+  opacity:.35;
+  filter:grayscale(.4);
+  pointer-events:none;
+}
 .found-tray{
   display:flex;
   flex-wrap:wrap;

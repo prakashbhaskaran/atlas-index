@@ -500,32 +500,44 @@
   var quizLookup = {};
   var quizFound = new Set();
   var quizTimerId = null;
-  var quizStartTime = 0;
+  var quizAccumulatedMs = 0;
+  var quizSegmentStart = 0;
   var quizDurationMs = 0;
   var quizMode = "countdown";
   var quizFinished = false;
+  var quizPaused = false;
   var quizCurrentFlagId = null;
 
+  // Elapsed time is tracked as time already banked (quizAccumulatedMs) plus
+  // however long the current unpaused segment has been running, so pausing
+  // just means freezing the segment instead of touching a single clock.
+  function quizElapsedMs(){
+    return quizAccumulatedMs + (quizPaused ? 0 : Date.now() - quizSegmentStart);
+  }
+
   function startQuiz(){
-    quizPool = applyLetterFilter(poolForRegion(quizRegion), quizLetters);
-    if(quizPool.length < 2){ quizPool = COUNTRIES.slice(); }
-    quizPool.sort(byName);
+    quizPool = shuffle(applyLetterFilter(poolForRegion(quizRegion), quizLetters));
+    if(quizPool.length < 2){ quizPool = shuffle(COUNTRIES); }
     // Flags mode still tests country names, so it shares the name lookup/aliases.
     var field = quizGame === "Capitals" ? "capital" : "name";
     var aliasMap = quizGame === "Capitals" ? CAPITAL_ALIASES : COUNTRY_ALIASES;
     quizLookup = buildLookup(quizPool, field, aliasMap);
     quizFound = new Set();
     quizFinished = false;
+    quizPaused = false;
     quizCurrentFlagId = null;
 
     var durSec = getDurationSeconds();
     quizDurationMs = durSec ? durSec * 1000 : null;
     quizMode = durSec ? "countdown" : "stopwatch";
-    quizStartTime = Date.now();
+    quizAccumulatedMs = 0;
+    quizSegmentStart = Date.now();
 
     document.getElementById("quizSetup").hidden = true;
     document.getElementById("quizResults").hidden = true;
     document.getElementById("quizRun").hidden = false;
+    document.getElementById("quizRun").classList.remove("paused");
+    document.getElementById("quizPause").textContent = "Pause";
     document.getElementById("quizTotal").textContent = quizPool.length;
     document.getElementById("quizFound").textContent = "0";
     document.getElementById("quizFeedback").textContent = " ";
@@ -546,6 +558,45 @@
     tickTimer();
     quizTimerId = setInterval(tickTimer, 250);
   }
+
+  function setFlagControlsDisabled(disabled){
+    document.getElementById("quizFlagPrev").disabled = disabled;
+    document.getElementById("quizFlagNext").disabled = disabled;
+    Array.prototype.forEach.call(document.querySelectorAll(".flag-tile:not(.found)"), function(t){
+      t.disabled = disabled;
+    });
+  }
+
+  function pauseQuiz(){
+    if(quizFinished || quizPaused) return;
+    quizAccumulatedMs += Date.now() - quizSegmentStart;
+    quizPaused = true;
+    clearInterval(quizTimerId);
+    var timerEl = document.getElementById("quizTimer");
+    timerEl.textContent = "Paused";
+    timerEl.classList.remove("low");
+    document.getElementById("quizInput").disabled = true;
+    document.getElementById("quizPause").textContent = "Resume";
+    document.getElementById("quizRun").classList.add("paused");
+    setFlagControlsDisabled(true);
+  }
+
+  function resumeQuiz(){
+    if(quizFinished || !quizPaused) return;
+    quizSegmentStart = Date.now();
+    quizPaused = false;
+    document.getElementById("quizPause").textContent = "Pause";
+    document.getElementById("quizRun").classList.remove("paused");
+    document.getElementById("quizInput").disabled = false;
+    setFlagControlsDisabled(false);
+    document.getElementById("quizInput").focus();
+    tickTimer();
+    quizTimerId = setInterval(tickTimer, 250);
+  }
+
+  document.getElementById("quizPause").addEventListener("click", function(){
+    if(quizPaused){ resumeQuiz(); } else { pauseQuiz(); }
+  });
 
   function renderFlagGrid(){
     var grid = document.getElementById("quizFlagGrid");
@@ -591,7 +642,7 @@
 
   function stepFlag(direction){
     var total = quizPool.length;
-    if(quizFinished || !total) return;
+    if(quizFinished || quizPaused || !total) return;
     var startIdx = currentFlagIndex();
     for(var offset = 1; offset <= total; offset++){
       var idx = ((startIdx + direction * offset) % total + total) % total;
@@ -600,7 +651,7 @@
   }
 
   function selectFlagTile(id){
-    if(quizFinished || quizFound.has(id)) return;
+    if(quizFinished || quizPaused || quizFound.has(id)) return;
     quizCurrentFlagId = id;
     var c = quizPool.filter(function(x){ return x.id === id; })[0];
     document.getElementById("quizFlagBig").innerHTML = flagImgHTML(c, 160);
@@ -629,7 +680,7 @@
   }
 
   function tickTimer(){
-    var elapsed = Date.now() - quizStartTime;
+    var elapsed = quizElapsedMs();
     var timerEl = document.getElementById("quizTimer");
     if(quizMode === "countdown"){
       var remaining = quizDurationMs - elapsed;
@@ -648,7 +699,7 @@
   document.getElementById("quizStart").addEventListener("click", startQuiz);
 
   document.getElementById("quizInput").addEventListener("input", function(e){
-    if(quizFinished) return;
+    if(quizFinished || quizPaused) return;
     var raw = e.target.value;
     var norm = normalizeStr(raw);
     if(!norm) return;
@@ -724,10 +775,11 @@
   function finishQuiz(){
     if(quizFinished) return;
     quizFinished = true;
+    quizPaused = false;
     clearInterval(quizTimerId);
     document.getElementById("quizInput").disabled = true;
 
-    var elapsed = Date.now() - quizStartTime;
+    var elapsed = quizElapsedMs();
     var timeTaken = quizMode === "countdown" ? Math.min(elapsed, quizDurationMs) : elapsed;
     var total = quizPool.length;
     var found = quizFound.size;
