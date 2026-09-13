@@ -635,7 +635,7 @@
     if(startIdx < 0) startIdx = -1;
     for(var offset = 1; offset <= total; offset++){
       var idx = (startIdx + offset) % total;
-      if(!quizFound.has(quizPool[idx].id)){ selectFlagTile(quizPool[idx].id); return; }
+      if(!quizFound.has(quizPool[idx].id)){ selectFlagTile(quizPool[idx].id, true); return; }
     }
     resetFlagPrompt();
   }
@@ -646,11 +646,11 @@
     var startIdx = currentFlagIndex();
     for(var offset = 1; offset <= total; offset++){
       var idx = ((startIdx + direction * offset) % total + total) % total;
-      if(!quizFound.has(quizPool[idx].id)){ selectFlagTile(quizPool[idx].id); return; }
+      if(!quizFound.has(quizPool[idx].id)){ selectFlagTile(quizPool[idx].id, true); return; }
     }
   }
 
-  function selectFlagTile(id){
+  function selectFlagTile(id, isAuto){
     if(quizFinished || quizPaused || quizFound.has(id)) return;
     quizCurrentFlagId = id;
     var c = quizPool.filter(function(x){ return x.id === id; })[0];
@@ -663,10 +663,12 @@
       tile.classList.toggle("selected", isSelected);
       if(isSelected) selectedTile = tile;
     });
-    if(selectedTile) selectedTile.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    if(selectedTile && !isAuto) selectedTile.scrollIntoView({ behavior: "smooth", block: "nearest" });
     var input = document.getElementById("quizInput");
     input.value = "";
-    input.focus();
+    // Only a direct flag-tile click pulls focus back to the input. Prev/Next
+    // and auto-advance after a correct answer leave focus alone.
+    if(!isAuto) input.focus();
   }
 
   function flashFlagIncorrect(){
