@@ -75,8 +75,14 @@
 
     <div class="frame" id="quizRun" hidden>
       <div class="quiz-hud">
-        <span class="timer num" id="quizTimer">10:00</span>
-        <span>Found <span class="score num" id="quizFound">0</span> / <span class="num" id="quizTotal">197</span></span>
+        <div class="quiz-hud-stats">
+          <span class="timer num" id="quizTimer">10:00</span>
+          <span>Found <span class="score num" id="quizFound">0</span> / <span class="num" id="quizTotal">197</span></span>
+        </div>
+        <div class="quiz-hud-actions">
+          <button class="ghost-btn" id="quizCancel">Cancel</button>
+          <button class="ghost-btn" id="quizFinish">Finish now</button>
+        </div>
       </div>
       <div class="flag-prompt" id="quizFlagPrompt" hidden>
         <div class="flag-big-row">
@@ -95,8 +101,6 @@
         <span class="best-line" id="quizHint">Matches register as you type — no need to press Enter.</span>
         <div class="quiz-footer-actions">
           <button class="ghost-btn" id="quizPause">Pause</button>
-          <button class="ghost-btn" id="quizCancel">Cancel</button>
-          <button class="ghost-btn" id="quizFinish">Finish now</button>
         </div>
       </div>
       <div id="quizLiveMapSection">

@@ -416,14 +416,18 @@ button{ font-family:inherit; }
 }
 .quiz-hud{
   display:flex;
+  flex-wrap:wrap;
   justify-content:space-between;
-  align-items:baseline;
+  align-items:center;
+  gap:.6rem;
   font-family:"IBM Plex Mono", monospace;
   font-size:.75rem;
   color:var(--ink-soft);
   margin-bottom:1.1rem;
   letter-spacing:.03em;
 }
+.quiz-hud-stats{ display:flex; align-items:baseline; gap:.9rem; }
+.quiz-hud-actions{ display:flex; flex-wrap:wrap; gap:.5rem; }
 .quiz-hud .score{ color:var(--ink); font-weight:600; }
 .prompt-hint{
   font-family:"IBM Plex Mono", monospace;
