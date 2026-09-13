@@ -305,7 +305,8 @@ button{ font-family:inherit; }
   gap:.15rem;
 }
 .letter-btn .n{ font-size:.55rem; color:var(--ink-soft); font-weight:400; }
-.letter-btn:hover:not(:disabled){ border-color:var(--accent-2); color:var(--ink); }
+.letter-btn:hover:not(:disabled):not([aria-pressed="true"]){ border-color:var(--accent-2); color:var(--ink); }
+.letter-btn[aria-pressed="true"]:hover{ border-color:var(--accent-2); }
 .letter-btn:disabled{ opacity:.3; cursor:default; }
 .letter-btn[aria-pressed="true"]{ background:var(--ink); border-color:var(--ink); color:var(--paper); }
 .letter-btn[aria-pressed="true"] .n{ color:var(--paper); }
