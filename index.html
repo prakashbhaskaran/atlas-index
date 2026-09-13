@@ -57,6 +57,9 @@
       <p class="field-label">Region</p>
       <div class="field-block chipset" id="quizRegionChips"></div>
 
+      <p class="field-label">Starting letter</p>
+      <div class="field-block letter-index" id="quizLetterIndex" aria-label="Filter by first letter"></div>
+
       <p class="field-label">Clock</p>
       <div class="field-block chipset" id="quizTimerChips"></div>
       <div class="field-block custom-timer-row" id="customTimerRow" hidden>
@@ -149,6 +152,13 @@
       <div><dt>Currency</dt><dd id="entryModalCurrency"></dd></div>
       <div><dt>Code</dt><dd id="entryModalCode"></dd></div>
     </dl>
+  </div>
+</div>
+
+<div class="modal-overlay" id="flagPopupOverlay" hidden>
+  <div class="modal flag-popup-modal" role="dialog" aria-modal="true" aria-label="Flag preview">
+    <button class="modal-close" id="flagPopupClose" type="button" aria-label="Close">×</button>
+    <div class="flag-popup-img" id="flagPopupImg"></div>
   </div>
 </div>
 

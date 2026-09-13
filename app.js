@@ -266,7 +266,9 @@
       return;
     }
     var entryEl = e.target.closest(".entry");
-    if(entryEl && entryEl.dataset.id){ openEntryModal(entryEl.dataset.id); }
+    if(!entryEl || !entryEl.dataset.id) return;
+    if(e.target.closest(".flag")){ openFlagPopupForId(entryEl.dataset.id); return; }
+    openEntryModal(entryEl.dataset.id);
   });
   document.getElementById("dirGrid").addEventListener("keydown", function(e){
     if(e.key !== "Enter" && e.key !== " ") return;
@@ -301,7 +303,30 @@
   });
   document.addEventListener("keydown", function(e){
     if(e.key === "Escape" && !document.getElementById("entryModalOverlay").hidden) closeEntryModal();
+    if(e.key === "Escape" && !document.getElementById("flagPopupOverlay").hidden) closeFlagPopup();
   });
+
+  /* ---------------- flag preview popup ---------------- */
+  // Clicking a flag anywhere it appears (directory list, quiz found/missed
+  // trays) shows it enlarged here, instead of whatever the flag's container
+  // would otherwise do (e.g. opening the full entry-details modal).
+  function openFlagPopup(c){
+    document.getElementById("flagPopupImg").innerHTML = flagImgHTML(c, 320);
+    document.getElementById("flagPopupOverlay").hidden = false;
+    document.body.classList.add("modal-open");
+  }
+  function closeFlagPopup(){
+    document.getElementById("flagPopupOverlay").hidden = true;
+    document.body.classList.remove("modal-open");
+  }
+  document.getElementById("flagPopupClose").addEventListener("click", closeFlagPopup);
+  document.getElementById("flagPopupOverlay").addEventListener("click", function(e){
+    if(e.target === this) closeFlagPopup();
+  });
+  function openFlagPopupForId(id){
+    var c = COUNTRIES.filter(function(x){ return x.id === id; })[0];
+    if(c) openFlagPopup(c);
+  }
 
   /* ---------------- confirm modal ---------------- */
   function showConfirm(message, okLabel, onConfirm){
@@ -361,6 +386,7 @@
 
   var quizGame = "Countries";
   var quizRegion = "All";
+  var quizLetters = new Set(); // empty = no letter filter ("All")
   var quizTimerLabel = "5 min";
 
   function updateModeUi(){
@@ -383,7 +409,50 @@
     updateModeUi();
     refreshBestLine();
   });
-  makeChipset(document.getElementById("quizRegionChips"), ["All"].concat(REGIONS), quizRegion, function(v){ quizRegion = v; refreshBestLine(); });
+  makeChipset(document.getElementById("quizRegionChips"), ["All"].concat(REGIONS), quizRegion, function(v){
+    quizRegion = v;
+    quizLetters.clear();
+    renderQuizLetterIndex();
+    refreshBestLine();
+  });
+
+  // Mirrors the directory's letter index but allows multiple letters at
+  // once: each letter toggles independently, and "All" clears the set
+  // rather than being just another exclusive choice. Counts reflect
+  // whichever region is currently selected, so switching region clears
+  // the letter selection back to "All".
+  function renderQuizLetterIndex(){
+    var pool = poolForRegion(quizRegion);
+    var counts = {};
+    pool.forEach(function(c){
+      var l = c.name.charAt(0).toUpperCase();
+      counts[l] = (counts[l] || 0) + 1;
+    });
+
+    var wrap = document.getElementById("quizLetterIndex");
+    wrap.innerHTML = "";
+    var allBtn = document.createElement("button");
+    allBtn.className = "letter-btn"; allBtn.type = "button";
+    allBtn.setAttribute("aria-pressed", quizLetters.size === 0 ? "true" : "false");
+    allBtn.innerHTML = "All<span class=\"n\">" + pool.length + "</span>";
+    allBtn.addEventListener("click", function(){ quizLetters.clear(); renderQuizLetterIndex(); refreshBestLine(); });
+    wrap.appendChild(allBtn);
+    ALPHABET.forEach(function(letter){
+      var count = counts[letter] || 0;
+      var btn = document.createElement("button");
+      btn.className = "letter-btn"; btn.type = "button";
+      btn.disabled = count === 0;
+      btn.setAttribute("aria-pressed", quizLetters.has(letter) ? "true" : "false");
+      btn.innerHTML = letter + "<span class=\"n\">" + count + "</span>";
+      btn.addEventListener("click", function(){
+        if(quizLetters.has(letter)){ quizLetters.delete(letter); } else { quizLetters.add(letter); }
+        renderQuizLetterIndex();
+        refreshBestLine();
+      });
+      wrap.appendChild(btn);
+    });
+  }
+  renderQuizLetterIndex();
   makeChipset(document.getElementById("quizTimerChips"), TIMER_PRESETS, quizTimerLabel, function(v){
     quizTimerLabel = v;
     document.getElementById("customTimerRow").hidden = (v !== "Custom");
@@ -410,7 +479,8 @@
     return quizTimerLabel === "Custom" ? ("Custom-" + getDurationSeconds() + "s") : quizTimerLabel;
   }
 
-  function bestKey(){ return quizGame + "|" + quizRegion + "|" + timerKeyPart(); }
+  function letterKeyPart(){ return quizLetters.size ? Array.from(quizLetters).sort().join("") : "All"; }
+  function bestKey(){ return quizGame + "|" + quizRegion + "|" + letterKeyPart() + "|" + timerKeyPart(); }
   function bestLineText(){
     var b = bestScores[bestKey()];
     return b ? ("Best on this checkpoint — " + b.found + " / " + b.total + " found in " + formatTime(b.timeMs)) : "No attempts logged yet for this checkpoint.";
@@ -420,6 +490,10 @@
 
   function poolForRegion(region){
     return region === "All" ? COUNTRIES.slice() : COUNTRIES.filter(function(c){ return c.region === region; });
+  }
+
+  function applyLetterFilter(pool, letters){
+    return letters.size === 0 ? pool : pool.filter(function(c){ return letters.has(c.name.charAt(0).toUpperCase()); });
   }
 
   var quizPool = [];
@@ -433,8 +507,9 @@
   var quizCurrentFlagId = null;
 
   function startQuiz(){
-    quizPool = poolForRegion(quizRegion);
+    quizPool = applyLetterFilter(poolForRegion(quizRegion), quizLetters);
     if(quizPool.length < 2){ quizPool = COUNTRIES.slice(); }
+    quizPool.sort(byName);
     // Flags mode still tests country names, so it shares the name lookup/aliases.
     var field = quizGame === "Capitals" ? "capital" : "name";
     var aliasMap = quizGame === "Capitals" ? CAPITAL_ALIASES : COUNTRY_ALIASES;
@@ -538,7 +613,9 @@
       if(isSelected) selectedTile = tile;
     });
     if(selectedTile) selectedTile.scrollIntoView({ behavior: "smooth", block: "nearest" });
-    document.getElementById("quizInput").value = "";
+    var input = document.getElementById("quizInput");
+    input.value = "";
+    input.focus();
   }
 
   function flashFlagIncorrect(){
@@ -613,11 +690,21 @@
     var tray = document.getElementById("quizFoundTray");
     var chip = document.createElement("span");
     chip.className = "found-chip";
+    chip.dataset.id = c.id;
     var label = quizGame === "Capitals" ? c.capital : c.name;
     chip.innerHTML = '<span class="flag">' + flagImgHTML(c) + '</span><span>' + label + '</span>';
     tray.insertBefore(chip, tray.firstChild);
     if(quizFound.size >= quizPool.length){ finishQuiz(); }
   }
+
+  [document.getElementById("quizFoundTray"), document.getElementById("missedTray")].forEach(function(tray){
+    tray.addEventListener("click", function(e){
+      var flagEl = e.target.closest(".flag");
+      if(!flagEl) return;
+      var chip = e.target.closest("[data-id]");
+      if(chip) openFlagPopupForId(chip.dataset.id);
+    });
+  });
 
   document.getElementById("quizFlagPrev").addEventListener("click", function(){ stepFlag(-1); });
   document.getElementById("quizFlagNext").addEventListener("click", function(){ stepFlag(1); });
@@ -648,7 +735,7 @@
 
     document.getElementById("quizRun").hidden = true;
     document.getElementById("quizResults").hidden = false;
-    document.getElementById("resultsLabel").textContent = quizGame + " checkpoint · " + quizRegion;
+    document.getElementById("resultsLabel").textContent = quizGame + " checkpoint · " + quizRegion + (quizLetters.size ? " · “" + Array.from(quizLetters).sort().join(", ") + "”" : "");
     document.getElementById("resultsScore").textContent = found + " / " + total;
     document.getElementById("resultsPct").textContent = pct + "% · " + formatTime(timeTaken);
 
@@ -681,6 +768,7 @@
       missed.forEach(function(c){
         var chip = document.createElement("span");
         chip.className = "missed-chip";
+        chip.dataset.id = c.id;
         chip.innerHTML = '<span class="flag">' + flagImgHTML(c) + '</span><span>' + c.name + '</span>';
         missedTray.appendChild(chip);
       });

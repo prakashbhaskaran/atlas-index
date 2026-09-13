@@ -393,6 +393,7 @@ button{ font-family:inherit; }
 
 @media (max-width:640px){
   .letter-index{ display:none; }
+  #quizLetterIndex{ display:flex; }
 }
 
 /* ---------- quiz ---------- */
@@ -832,6 +833,23 @@ body.modal-open{ overflow:hidden; }
 .modal-flag .flag-img{
   border-radius:6px;
   box-shadow:0 4px 14px var(--shadow), 0 0 0 1px var(--line) inset;
+}
+.flag-popup-modal{
+  max-width:min(90vw, 420px);
+  background:transparent;
+  box-shadow:none;
+  border:none;
+  padding:0;
+}
+.flag-popup-img{
+  display:flex;
+  justify-content:center;
+}
+.flag-popup-img .flag-img{
+  width:100%;
+  height:auto;
+  border-radius:8px;
+  box-shadow:0 8px 28px var(--shadow), 0 0 0 1px var(--line) inset;
 }
 .modal-name{
   font-size:1.5rem;
