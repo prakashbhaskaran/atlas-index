@@ -615,15 +615,7 @@ button{ font-family:inherit; }
 .flag-tile.found{ border-color:var(--success); background:var(--card); }
 .flag-tile.found .flag-img{ opacity:.45; }
 .flag-tile.found .tile-name{ display:block; }
-.quiz-footer{
-  display:flex;
-  flex-wrap:wrap;
-  justify-content:space-between;
-  align-items:center;
-  gap:.6rem;
-  margin-top:1rem;
-}
-.quiz-footer-actions{ display:flex; flex-wrap:wrap; gap:.5rem; }
+.quiz-footer{ margin-top:1rem; }
 #quizRun.paused .flag-prompt,
 #quizRun.paused .flag-grid,
 #quizRun.paused .quiz-input-row,
